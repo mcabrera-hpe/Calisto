@@ -1,0 +1,65 @@
+services:
+  weaviate:
+    image: semitechnologies/weaviate:1.24.0
+    container_name: callisto-weaviate
+    ports:
+      - "8080:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      ENABLE_MODULES: ''
+      CLUSTER_HOSTNAME: 'node1'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      - callisto-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: callisto-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - callisto-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: callisto-app
+    ports:
+      - "8501:8501"
+    environment:
+      - WEAVIATE_URL=http://weaviate:8080
+      - OLLAMA_URL=http://ollama:11434
+      - DEFAULT_MODEL=llama3.1
+      - MAX_TURNS=30
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+      - ./data:/app/data
+      - ./.streamlit:/app/.streamlit
+    depends_on:
+      - weaviate
+      - ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - callisto-network
+    command: ["streamlit", "run", "src/app.py", "--server.address", "0.0.0.0"]
+
+volumes:
+  weaviate_data:
+  ollama_models:
+
+networks:
+  callisto-network:
+    driver: bridge

@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "callisto"
+version = "0.1.0"
+description = "Multi-Agent Conversation Simulator for PoC Development"
+authors = ["AI/ML Engineer"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+streamlit = "^1.30.0"
+weaviate-client = "^3.26.0"
+requests = "^2.31.0"
+llama-index-core = "^0.10.0"
+llama-index-vector-stores-weaviate = "^0.1.0"
+llama-index-embeddings-ollama = "^0.1.0"
+transformers = "^4.36.0"
+torch = "^2.1.0"
+pypdf = "^4.0.0"
+python-docx = "^1.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
