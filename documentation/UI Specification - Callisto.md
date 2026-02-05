@@ -76,21 +76,39 @@ streamlit run src/app.py --server.fileWatcherType poll --server.address 0.0.0.0
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  Callisto - Multi-Agent Conversation Simulator      [🌙] │  <- Header
+│  🤖 Callisto                                             │  <- Header
+│  Multi-Agent Conversation Simulator                      │
 ├─────────────┬────────────────────────────────────────────┤
 │             │                                            │
-│   Sidebar   │           Main Content Area               │
-│   (Fixed)   │           (Dynamic Tabs)                  │
+│   Setup     │           Conversation                     │
+│  (Column 1) │           (Column 2)                       │
 │             │                                            │
-│   [Mode]    │   Tab: Create Scenario | Past Convos     │
-│   [Client]  │                                            │
-│   [Scenario]│   [Content varies by tab and mode]        │
-│   [Options] │                                            │
+│  Client:    │   [Messages display here]                 │
+│  [Dropdown] │                                            │
+│             │   💭 Agent is thinking... [spinner]       │
+│  Scenario:  │                                            │
+│  [Textarea] │                                            │
 │             │                                            │
-│   [Actions] │                                            │
+│  Max Turns: │                                            │
+│  [Slider]   │                                            │
 │             │                                            │
+│  # Agents:  │                                            │
+│  [Number]   │                                            │
+│             │                                            │
+│  [▶️ Start] │                                            │
+│  [⏹️ Stop]  │                                            │
+│  [🔄 New]   │                                            │
 └─────────────┴────────────────────────────────────────────┘
+│  Callisto v0.1 | 100% Local | Powered by Mistral        │  <- Footer
+└──────────────────────────────────────────────────────────┘
 ```
+
+### Simplified Design Principles
+
+**No Tabs:** Single page layout for simplicity
+**No Wizards:** Direct input and execution
+**Real-time Feedback:** Streaming messages with visual indicators
+**Minimal Chrome:** Focus on the conversation
 
 ### File Structure
 
@@ -129,174 +147,184 @@ if 'suggested_agents' not in st.session_state:
 
 ## Screen Specifications
 
-### Screen 1: Scenario Creation (Default)
+### Single Page Layout
 
-**When Shown:** Default view when app loads or when "Create Scenario" tab selected
+**Layout:** Simple two-column design
 
-**Layout:**
+**Left Column - Setup Panel:**
+- Client selection dropdown
+- Scenario description textarea  
+- Max turns slider (1-10)
+- Number of agents selector (2-5)
+- Action buttons (Start/Stop/New)
+
+**Right Column - Conversation Display:**
+- Real-time message stream
+- Loading indicators with agent names
+- Status messages (complete/stopped/error)
+
+**No Tabs, No Wizards, No Separate Screens**
+
+### Layout Implementation
 
 ```
 ┌─────────────┬────────────────────────────────────────────┐
-│  Sidebar    │  Main Area                                 │
+│  Setup      │  Conversation                              │
 │             │                                            │
-│ Client:     │  Scenario Creation Wizard                  │
-│ [Dropdown]  │                                            │
-│             │  ┌──────────────────────────────────────┐  │
-│ Scenario:   │  │ Step 1: Configure Scenario          │  │
-│ [Textarea]  │  └──────────────────────────────────────┘  │
+│ Client:     │  🏢 Sarah (HPE)                            │
+│ [Toyota ▼]  │  "Our servers offer excellent value..."   │
 │             │                                            │
-│ ☐ I want to │  Selected Client: Toyota                   │
-│   participate                                            │
-│             │  Scenario Description:                     │
-│             │  "Negotiate server purchase contract"     │
-│ [Generate   │                                            │
-│  Agents]    │  ☑ I want to participate as company agent │
+│ Scenario:   │  👤 Yuki (Toyota)                          │
+│ [Negotiate  │  "What's your best price for 100 units?"  │
+│  server     │                                            │
+│  purchase]  │  💭 Sarah is thinking... [spinner]        │
 │             │                                            │
-│             │  ┌──────────────────────────────────────┐  │
-│             │  │ Step 2: Review Suggested Agents     │  │
-│             │  └──────────────────────────────────────┘  │
+│ Max Turns:  │                                            │
+│ [━━━━○━━━]  │                                            │
+│     5       │                                            │
 │             │                                            │
-│             │  Agent 1: You (HPE - Sales Engineer)      │
-│             │  Objective: Sell 100 servers              │
+│ # Agents:   │                                            │
+│ [    2   ]  │                                            │
 │             │                                            │
-│             │  Agent 2: Yuki (Toyota - Procurement)     │
-│             │  Objective: Get best price                │
-│             │                                            │
-│             │  [Run Simulation]  [Regenerate Agents]    │
+│ [▶️ Start]  │                                            │
 └─────────────┴────────────────────────────────────────────┘
 ```
 
 **Components:**
 
-#### Sidebar - Scenario Input Form
+#### Left Column - Setup Panel
 
 ```python
-with st.sidebar:
-    st.title("🤖 Callisto")
-    st.markdown("---")
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.subheader("Setup")
     
     # Client selection
-    st.subheader("1. Select Client")
-    available_clients = list_tenants()  # Get from Weaviate
-    if not available_clients:
-        st.warning("No clients found. Please ingest documents first.")
-        st.stop()
-    
     client = st.selectbox(
         "Client Company",
-        options=available_clients,
-        help="Select which company the client agents will represent"
+        options=["Toyota", "Microsoft", "HPE"],
+        key="client"
     )
     
-    st.markdown("---")
-    
-    # Scenario description
-    st.subheader("2. Describe Scenario")
-    scenario_description = st.text_area(
-        "What should the agents discuss?",
-        placeholder="Example: Negotiate server purchase contract with 30% discount request",
+    # Scenario input
+    scenario = st.text_area(
+        "Scenario",
+        placeholder="Example: Negotiate server purchase with 30% discount",
         height=100,
-        help="Describe the conversation objective in natural language"
+        key="scenario"
     )
     
-    # Human participation
-    participate = st.checkbox(
-        "I want to participate",
-        help="Check this to act as one of the agents yourself"
-    )
+    # Max turns
+    max_turns = st.slider("Max Turns", 1, 10, 5)
     
-    st.markdown("---")
+    # Number of agents
+    num_agents = st.number_input("Number of Agents", min_value=2, max_value=5, value=2, step=1)
     
-    # Generate button
-    generate_button = st.button(
-        "🎲 Generate Agents",
-        type="primary",
-        disabled=not scenario_description,
-        use_container_width=True
-    )
+    st.divider()
+    
+    # Control buttons
+    if not st.session_state.running:
+        if st.button("▶️ Start Conversation", type="primary", disabled=not scenario, use_container_width=True):
+            st.session_state.running = True
+            st.session_state.conversation = []
+            st.session_state.stop_requested = False
+            st.rerun()
+    else:
+        if st.button("⏹️ Stop", type="secondary", use_container_width=True):
+            st.session_state.stop_requested = True
+            st.session_state.running = False
+            st.rerun()
+    
+    if st.session_state.conversation:
+        if st.button("🔄 New Conversation", use_container_width=True):
+            st.session_state.conversation = []
+            st.session_state.scenario = ""
+            st.session_state.running = False
+            st.rerun()
 ```
 
-#### Main Area - Agent Preview
+#### Right Column - Conversation Display
 
 ```python
-st.header("Scenario Creation")
-
-if not st.session_state.suggested_agents:
-    # Show instructions
-    st.info("👈 Fill out the form in the sidebar and click 'Generate Agents' to begin")
+with col2:
+    st.subheader("Conversation")
     
-    # Show example scenarios
-    st.subheader("Example Scenarios")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        **Simple B2B Sale**
-        - Client: Toyota
-        - Scenario: "Negotiate server purchase contract"
-        - Agents: 2 (Sales, Procurement)
-        """)
-    
-    with col2:
-        st.markdown("""
-        **Complex Enterprise Deal**
-        - Client: Microsoft
-        - Scenario: "Multi-party contract with technical and legal review"
-        - Agents: 4 (Sales, Tech, Procurement, Legal)
-        """)
-
-else:
-    # Show suggested agents
-    st.subheader("Step 2: Review Suggested Agents")
-    
-    agents = st.session_state.suggested_agents
-    
-    # Display each agent
-    for i, agent_config in enumerate(agents):
-        with st.expander(
-            f"Agent {i+1}: {agent_config['name']} ({agent_config['company']} - {agent_config['role']})",
-            expanded=True
-        ):
-            col1, col2 = st.columns(2)
+    if st.session_state.running:
+        # Create agents dynamically based on num_agents
+        agent_configs = [
+            {"name": "Sarah", "company": "HPE", "role": "Sales Engineer", 
+             "objective": "Sell servers and close the deal"},
+            {"name": "Yuki", "company": client, "role": "IT Procurement Manager", 
+             "objective": "Get the best price and terms"},
+            {"name": "Marcus", "company": client, "role": "Technical Lead", 
+             "objective": "Ensure technical requirements are met"},
+            {"name": "Lisa", "company": "HPE", "role": "Account Manager", 
+             "objective": "Build relationship and ensure customer satisfaction"},
+            {"name": "Ken", "company": client, "role": "CFO", 
+             "objective": "Minimize costs and maximize ROI"}
+        ]
+        
+        # Create only the number of agents requested
+        agents = []
+        for i in range(num_agents):
+            config = agent_configs[i]
+            agents.append(Agent(
+                name=config["name"],
+                company=config["company"],
+                role=config["role"],
+                objective=config["objective"],
+                model=DEFAULT_MODEL
+            ))
+        
+        # Run streaming conversation
+        orchestrator = MultiAgentOrchestrator(agents=agents, max_turns=max_turns)
+        
+        message_placeholder = st.empty()
+        status_placeholder = st.empty()
+        
+        try:
+            for message in orchestrator.run_streaming(initial_message=f"Let's discuss: {scenario}"):
+                st.session_state.conversation.append(message)
+                
+                # Display all messages so far
+                with message_placeholder.container():
+                    for msg in st.session_state.conversation:
+                        with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
+                            st.markdown(f"**{msg['agent']}** ({msg['company']})")
+                            st.write(msg['message'])
+                
+                # Show who's next with a spinner
+                current_turn = len(st.session_state.conversation)
+                if current_turn < max_turns * num_agents and not st.session_state.stop_requested:
+                    next_agent_index = current_turn % num_agents
+                    next_agent = agents[next_agent_index]
+                    with status_placeholder:
+                        with st.spinner(f"💭 {next_agent.name} is thinking..."):
+                            pass
+                
+                # Check if stop was requested
+                if st.session_state.stop_requested:
+                    status_placeholder.empty()
+                    st.warning("⏹️ Conversation stopped by user")
+                    break
             
-            with col1:
-                st.markdown(f"**Name:** {agent_config['name']}")
-                st.markdown(f"**Company:** {agent_config['company']}")
-                st.markdown(f"**Role:** {agent_config['role']}")
+            status_placeholder.empty()
+            st.session_state.running = False
+            st.success(f"✅ Conversation complete! {len(st.session_state.conversation)} messages")
             
-            with col2:
-                st.markdown(f"**Type:** {'Human' if agent_config.get('is_human') else 'AI'}")
-                st.markdown(f"**Objective:** {agent_config['objective']}")
-            
-            # Show system prompt preview (collapsed by default)
-            if 'system_prompt' in agent_config:
-                with st.expander("System Prompt (Advanced)", expanded=False):
-                    st.code(agent_config['system_prompt'], language='text')
+        except Exception as e:
+            st.error(f"Error: {e}")
+            st.session_state.running = False
     
-    st.markdown("---")
-    
-    # Action buttons
-    col1, col2, col3 = st.columns([2, 1, 1])
-    
-    with col1:
-        run_button = st.button(
-            "▶️ Run Simulation",
-            type="primary",
-            use_container_width=True
-        )
-    
-    with col2:
-        regenerate_button = st.button(
-            "🔄 Regenerate",
-            use_container_width=True
-        )
-    
-    with col3:
-        cancel_button = st.button(
-            "❌ Cancel",
-            use_container_width=True
-        )
+    elif st.session_state.conversation:
+        # Display saved conversation
+        for msg in st.session_state.conversation:
+            with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
+                st.markdown(f"**{msg['agent']}** ({msg['company']})")
+                st.write(msg['message'])
+    else:
+        st.info("👈 Configure the scenario and click Start to begin")
 ```
 
 **User Interactions:**
@@ -307,16 +335,49 @@ else:
 4. **Click Generate:** Triggers `suggest_agents()` call to LLM
 5. **Review Agents:** Expandable cards show agent details
 6. **Run/Regenerate/Cancel:** Action buttons
+Choose from dropdown (Toyota, Microsoft, HPE)
+2. **Enter Scenario:** Type description in textarea
+3. **Set Max Turns:** Adjust slider (1-10 turns)
+4. **Set Number of Agents:** Choose 2-5 agents
+5. **Click Start:** Begins conversation with pre-configured agents
+6. **Watch Stream:** Messages appear in real-time with loading indicators
+7. **Click Stop:** Interrupts conversation mid-execution
+8. **Click New:** Resets form and conversation for fresh start
+
+**Key Features:**
+- **Pre-configured Agents:** No LLM generation needed - uses hardcoded agent pool
+- **Real-time Streaming:** Messages appear as they're generated
+- **Visual Feedback:** Spinner shows which agent is currently thinking
+- **Interrupt Control:** Stop button allows user to end conversation early
+- **Multi-agent Support:** Supports 2-5 agents in round-robin conversation
 
 ---
 
-### Screen 2: Active Conversation
+### Removed Features
 
-**When Shown:** After clicking "Run Simulation" on Screen 1
+The following features from the original spec have been removed for simplicity:
 
-**Layout:**
+- ~~Scenario Creation Wizard~~ → Direct input
+- ~~Agent Suggestion/Generation via LLM~~ → Pre-configured agents
+- ~~Human Participation Mode~~ → Autonomous only
+- ~~Past Conversations Tab~~ → Not implemented
+- ~~Sentiment Tracking~~ → Not implemented  
+- ~~Metrics Dashboard~~ → Not implemented
+- ~~Sidebar with detailed metrics~~ → Single column layout
+- ~~Save/Load functionality~~ → Not implemented
+- ~~Multiple tabs/views~~ → Single page only
 
-```
+---
+
+### Screen 2: Active Conversation (Legacy - Not Implemented)
+
+**Note:** The original multi-screen design with separate conversation view has been replaced with the single-page streaming layout described above.
+
+---
+
+### Screen 3: Past Conversations (Not Implemented)
+
+**Note:** Past conversations feature removed for MVP simplicity.
 ┌─────────────┬────────────────────────────────────────────┐
 │  Sidebar    │  Main Area - Active Conversation          │
 │             │                                            │
@@ -690,85 +751,34 @@ if st.session_state.get('viewing_conversation'):
         st.subheader("Agents")
         for agent in conv['agents']:
             st.markdown(f"- **{agent['name']}** ({agent['company']} - {agent['role']})")
-        
-        st.markdown("---")
-        
-        # Show conversation
-        st.subheader("Conversation")
-        
-        for msg in conv['conversation']:
-            avatar = "🏢" if msg['company'] == conv['company'] else "👤"
-            
-            with st.chat_message("assistant" if msg['company'] == conv['company'] else "user", avatar=avatar):
-                st.markdown(f"**{msg['agent']}** ({msg['company']} - {msg.get('role', 'Unknown')})")
-                st.markdown(msg['message'])
-                st.caption(f"Sentiment: {msg['sentiment']:.2f}")
-        
-        # Show metrics
-        st.markdown("---")
-        st.subheader("Metrics")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Turns", conv['metrics']['total_turns'])
-        with col2:
-            st.metric("Final Client Sentiment", f"{conv['metrics']['final_client_sentiment']:.2f}")
-        with col3:
-            st.metric("Final Company Sentiment", f"{conv['metrics']['final_company_sentiment']:.2f}")
-```
-
----
-
-## Component Library
-
-### Reusable Components
-
-#### 1. Agent Card Component
+        Chat Message Display
 
 ```python
-def render_agent_card(agent_config: dict, index: int):
-    """Render an agent configuration card"""
-    
-    with st.expander(
-        f"Agent {index + 1}: {agent_config['name']} ({agent_config['company']} - {agent_config['role']})",
-        expanded=True
-    ):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown(f"**Name:** {agent_config['name']}")
-            st.markdown(f"**Company:** {agent_config['company']}")
-            st.markdown(f"**Role:** {agent_config['role']}")
-        
-        with col2:
-            agent_type = 'Human' if agent_config.get('is_human') else 'AI'
-            st.markdown(f"**Type:** {agent_type}")
-            st.markdown(f"**Objective:** {agent_config['objective']}")
-        
-        # Tools
-        if 'tools' in agent_config:
-            st.markdown(f"**Tools:** {', '.join(agent_config['tools'])}")
-        
-        # System prompt (advanced)
-        if 'system_prompt' in agent_config:
-            with st.expander("System Prompt (Advanced)", expanded=False):
-                st.code(agent_config['system_prompt'], language='text')
+# Display a single message in the conversation
+with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
+    st.markdown(f"**{msg['agent']}** ({msg['company']})")
+    st.write(msg['message'])
 ```
 
-#### 2. Sentiment Display Component
+#### 2. Loading Spinner with Agent Name
 
 ```python
-def render_sentiment_display(sentiment: float, label: str = "Sentiment"):
-    """Render sentiment score with emoji and color"""
-    
-    # Emoji based on sentiment
-    if sentiment > 0.7:
-        emoji = "😊"
-        color = "green"
-    elif sentiment > 0.4:
-        emoji = "😐"
-        color = "orange"
-    else:
+# Show which agent is currently generating a response
+with st.spinner(f"💭 {agent.name} is thinking..."):
+    pass  # Placeholder that gets replaced when message arrives
+```
+
+#### 3. Status Messages
+
+```python
+# Conversation complete
+st.success(f"✅ Conversation complete! {len(messages)} messages")
+
+# Conversation stopped by user
+st.warning("⏹️ Conversation stopped by user")
+
+# Error occurred
+st.error(f"Error: {error_message}"
         emoji = "😟"
         color = "red"
     
@@ -826,76 +836,59 @@ User Action                           System Response                    UI Upda
                                    → Check termination                
 8. Conversation ends               → Save to Weaviate                 → Show "Save & Exit" button
 9. Clicks "Save & Exit"            → Export JSON                      → Return to scenario wizard
-                                   → Clear session state              → Reset form
-```
-
-### Flow 2: Participate in Conversation (Human Mode)
+            Run Autonomous Multi-Agent Conversation
 
 ```
 User Action                           System Response                    UI Update
 ───────────────────────────────────────────────────────────────────────────────
-1-3. (Same as Flow 1)
-4. Checks "I want to participate"  → Update session state             → Checkbox checked
-5. Clicks "Generate Agents"        → Call suggest_agents(LLM)        → Show loading spinner
-                                   → Add HumanAgent to config         → Show 2 agents (You + AI)
-6. Reviews agents                  → (No action)                      → Your agent marked "Human"
-7. Clicks "Run Simulation"         → Create agents                    → Switch to conversation view
-                                   → Start orchestrator               → Show chat input (enabled)
-8. Client agent sends message      → Append to history                → New message appears
-                                   → Calculate sentiment              → Chart updates
-                                   → Wait for human                   → Show "Waiting for your input"
-9. User types response             → (No action)                      → Text appears in input
-10. User presses Enter             → Process human message            → Message added to chat
-                                   → Client agent responds            → New AI message streams in
-11. (Repeat 8-10)                  → Continue conversation            → Chat grows
-12. Clicks "End Conversation"      → Force termination                → Conversation stops
-13. Clicks "Save & Exit"           → Save with human messages marked  → Return to wizard
+1. Opens app                       → Load default screen              → Show setup panel + empty conversation
+2. Selects client "Toyota"         → Update session state             → Dropdown shows "Toyota"
+3. Types scenario description      → Update session state             → Textarea shows text
+4. Adjusts max turns to 5          → Update session state             → Slider shows 5
+5. Sets number of agents to 3      → Update session state             → Shows "3"
+6. Clicks "▶️ Start"               → Create 3 agents from pool        → Conversation panel activates
+                                   → Initialize orchestrator          → Show first message
+                                   → Start streaming                  
+7. (Autonomous execution)          → Agent 1 generates message        → Message appears in chat
+                                   → Show "Agent 2 thinking..."       → Spinner with agent name
+                                   → Agent 2 generates message        → Message appears
+                                   → Show "Agent 3 thinking..."       → Spinner updates
+                                   → Agent 3 generates message        → Message appears
+                                   → Cycle continues                  → Chat grows in real-time
+8. Conversation ends (max turns)   → Orchestrator completes           → Show "✅ Conversation complete!"
+9. Clicks "🔄 New Conversation"    → Clear session state              → Reset form and conversation
 ```
 
-### Flow 3: Regenerate Agents
-
-```
-User Action                           System Response                    UI Update
-───────────────────────────────────────────────────────────────────────────────
-1-4. (Same as Flow 1)
-5. Reviews suggested agents        → (No action)                      → Shows 2 agents
-6. Clicks "Regenerate Agents"      → Call suggest_agents(LLM) again  → Show loading spinner
-                                   → Different seed/temperature       → New agents appear
-7. Reviews new agents              → (No action)                      → Different names/roles
-8. Satisfied, clicks "Run"         → (Continue Flow 1 from step 6)    
-```
-
-### Flow 4: View Past Conversation
+### Flow 2: Interrupt Conversation Mid-Execution
 
 ```
 User Action                           System Response                    UI Update
 ───────────────────────────────────────────────────────────────────────────────
-1. Clicks "Past Conversations" tab → Query Weaviate                   → Show conversation list
-2. Selects client filter "Toyota"  → Filter conversations             → List updates (fewer items)
-3. Clicks "View" on a conversation → Load full conversation           → Show replay modal
-4. Scrolls through messages        → (No action)                      → Messages display
-5. Views metrics                   → (No action)                      → Metrics shown
-6. Clicks "Close"                  → Clear viewing state              → Return to list
-7. Clicks "Export" on conversation → Generate JSON file               → Download triggered
-                                   → Save to data/conversations/      → Success message
+1-6. (Same as Flow 1)
+7. Conversation is running         → Messages streaming               → Chat updating in real-time
+8. User clicks "⏹️ Stop"           → Set stop_requested flag          → Button changes to "⏹️ Stop"
+9. Current message completes       → Check stop flag                  → Last message appears
+                                   → Break loop                       → Show "⏹️ Conversation stopped"
+                                   → Clear spinner                    
+10. User reviews partial convo     → (No action)                      → Messages remain visible
+11. Clicks "🔄 New Conversation"   → Clear session state              → Reset form
 ```
 
----
+### Flow 3: Adjust Agent Count
 
-## Integration Points
-
-### 1. Backend Integration
-
-#### Scenario Suggestion (LLM Call)
-
-```python
-# Called when user clicks "Generate Agents"
-
-from agents.suggester import suggest_agents
-
-suggested_agents = suggest_agents(
-    scenario_description=scenario_description,
-    client_company=client,
+```
+User Action                           System Response                    UI Update
+───────────────────────────────────────────────────────────────────────────────
+1-5. (Similar to Flow 1)
+6. Sets agents to 5                → Update session state             → Number input shows "5"
+7. Clicks "▶️ Start"               → Create 5 agents:                 → Conversation starts
+                                     - Sarah (HPE)
+                                     - Yuki (Toyota)
+                                     - Marcus (Toyota)
+                                     - Lisa (HPE)
+                                     - Ken (Toyota)
+8. Round-robin with 5 agents       → Each agent takes turn            → 5-way conversation flows
+                                   → Spinner shows next agent name    
     include_human=participate
 )
 
@@ -921,207 +914,69 @@ agents = []
 
 for agent_config in st.session_state.suggested_agents:
     if agent_config.get('is_human'):
-        agent = HumanAgent(name=agent_config['name'])
-    else:
-        # Create RAG tool with tenant
-        rag_tool = RAGTool(tenant=agent_config['company'].lower().replace(' ', '_'))
-        
-        agent = create_agent(
-            name=agent_config['name'],
-            company=agent_config['company'],
-            role=agent_config['role'],
-            objective=agent_config['objective'],
-            tools=[rag_tool]
-        )
-    
-    agents.append(agent)
+     Agent Creation (Pre-configured)
+
+```python
+# Pre-configured agent pool (5 agents available)
+agent_configs = [
+    {"name": "Sarah", "company": "HPE", "role": "Sales Engineer", 
+     "objective": "Sell servers and close the deal"},
+    {"name": "Yuki", "company": client, "role": "IT Procurement Manager", 
+     "objective": "Get the best price and terms"},
+    {"name": "Marcus", "company": client, "role": "Technical Lead", 
+     "objective": "Ensure technical requirements are met"},
+    {"name": "Lisa", "company": "HPE", "role": "Account Manager", 
+     "objective": "Build relationship and ensure customer satisfaction"},
+    {"name": "Ken", "company": client, "role": "CFO", 
+     "objective": "Minimize costs and maximize ROI"}
+]
+
+# Create agents based on user selection (2-5)
+agents = []
+for i in range(num_agents):
+    config = agent_configs[i]
+    agents.append(Agent(
+        name=config["name"],
+        company=config["company"],
+        role=config["role"],
+        objective=config["objective"],
+        model=DEFAULT_MODEL  # mistral
+    ))
+```
+
+#### Conversation Execution (Streaming)
+
+```python
+from agents.core import MultiAgentOrchestrator
 
 # Create orchestrator
-orchestrator = MultiAgentOrchestrator(
-    agents=agents,
-    max_turns=30
-)
+orchestrator = MultiAgentOrchestrator(agents=agents, max_turns=max_turns)
 
-st.session_state.orchestrator = orchestrator
+# Stream conversation with real-time UI updates
+for message in orchestrator.run_streaming(initial_message=f"Let's discuss: {scenario}"):
+    # message = {"turn": N, "agent": "Sarah", "company": "HPE", 
+    #            "role": "Sales Engineer", "message": "...", "timestamp": "..."}
+    
+    st.session_state.conversation.append(message)
+    
+    # Update UI (Streamlit reruns automatically on state change)
+    display_messages()
+    show_next_agent_spinner()
+    
+    # Check for stop request
+    if st.session_state.stop_requested:
+        break
 ```
 
-#### Conversation Execution
+### 2. Removed Integrations
 
-```python
-# Run conversation loop (async or in background)
+The following integrations from the original spec are NOT implemented:
 
-def run_conversation():
-    """Execute conversation and update UI in real-time"""
-    
-    initial_message = st.session_state.suggested_agents[0].get('initial_message', "Let's begin.")
-    
-    for turn_data in st.session_state.orchestrator.run_stream(initial_message):
-        # turn_data = {"agent": "Sarah", "message": "...", "sentiment": 0.7, ...}
-        
-        # Add to conversation history
-        st.session_state.conversation.append(turn_data)
-        
-        # Trigger UI update
-        st.rerun()
-```
-
-#### Persistence
-
-```python
-# Save conversation
-
-from utils.persistence import save_conversation
-
-conversation_data = {
-    "scenario": {
-        "description": st.session_state.scenario_description,
-        "client_company": st.session_state.client,
-        "timestamp": datetime.now().isoformat()
-    },
-    "agents": st.session_state.suggested_agents,
-    "conversation": st.session_state.conversation,
-    "metrics": calculate_metrics(st.session_state.conversation)
-}
-
-save_conversation(conversation_data)
-# Saves to Weaviate ConversationHistory collection
-# Exports to data/conversations/<timestamp>.json
-```
-
-### 2. Weaviate Integration
-
-#### List Available Clients
-
-```python
-from utils.tenants import list_tenants
-
-def list_tenants() -> List[str]:
-    """Get all tenants from Weaviate Documents collection"""
-    
-    client = weaviate.Client("http://weaviate:8080")
-    collection = client.collections.get("Documents")
-    tenants = collection.tenants.get()
-    
-    return [t.name for t in tenants]
-```
-
-#### Load Past Conversations
-
-```python
-from utils.persistence import load_conversations
-
-def load_conversations(
-    client_filter: str = None,
-    date_from: date = None,
-    date_to: date = None,
-    sort_by: str = "Most Recent"
-) -> List[Dict]:
-    """Query ConversationHistory collection"""
-    
-    client = weaviate.Client("http://weaviate:8080")
-    collection = client.collections.get("ConversationHistory")
-    
-    # Build filter
-    filters = []
-    if client_filter:
-        filters.append({"path": ["client_company"], "operator": "Equal", "valueText": client_filter})
-    if date_from:
-        filters.append({"path": ["timestamp"], "operator": "GreaterThanEqual", "valueDate": date_from.isoformat()})
-    
-    # Query
-    results = collection.query.fetch_objects(
-        filters=filters,
-        limit=100
-    )
-    
-    # Sort
-    # ... sorting logic
-    
-    return results
-```
-
-### 3. Ollama Integration (Streaming)
-
-```python
-import requests
-import json
-
-def stream_llm_response(agent, message, history):
-    """Stream response from Ollama and update UI in real-time"""
-    
-    # Build messages
-    messages = [
-        {"role": "system", "content": agent.system_prompt}
-    ]
-    for msg in history[-5:]:  # Last 5 turns for context
-        messages.append({"role": "user", "content": msg['message']})
-    messages.append({"role": "user", "content": message})
-    
-    # Stream from Ollama
-    response = requests.post(
-        "http://ollama:11434/api/chat",
-        json={
-            "model": "llama3.1",
-            "messages": messages,
-            "stream": True
-        },
-        stream=True
-    )
-    
-    # Display streaming
-    message_placeholder = st.empty()
-    full_response = ""
-    
-    for line in response.iter_lines():
-        if line:
-            chunk = json.loads(line)
-            if "message" in chunk:
-                token = chunk["message"]["content"]
-                full_response += token
-                
-                # Update UI with cursor
-                message_placeholder.markdown(full_response + "▌")
-    
-    # Final message without cursor
-    message_placeholder.markdown(full_response)
-    
-    return full_response
-```
-
----
-
-## State Management
-
-### Session State Variables
-
-Streamlit's `st.session_state` is used to persist data across reruns:
-
-```python
-# Initialize in app.py
-
-if 'initialized' not in st.session_state:
-    st.session_state.initialized = True
-    
-    # Scenario creation
-    st.session_state.suggested_agents = None
-    st.session_state.scenario_description = ""
-    st.session_state.client = None
-    st.session_state.participate = False
-    
-    # Active conversation
-    st.session_state.conversation = []
-    st.session_state.orchestrator = None
-    st.session_state.conversation_active = False
-    st.session_state.max_turns = 30
-    st.session_state.streaming_message = ""
-    
-    # Past conversations
-    st.session_state.viewing_conversation = None
-    st.session_state.filter_applied = False
-    
-    # UI state
-    st.session_state.current_tab = "Create Scenario"
-```
+- ~~Weaviate tenant listing~~ → Hardcoded client list
+- ~~LLM agent suggestion~~ → Pre-configured agents
+- ~~Sentiment analysis~~ → Not implemented
+- ~~Conversation persistence~~ → Not implemented  
+- ~~Past conversation retrieval~~ → Not implemented
 
 ### State Transitions
 
@@ -1272,44 +1127,30 @@ except Exception as e:
 
 #### Phase 6: Persistence & Replay (Day 16-17)
 
-26. Add "Save & Exit" button
-27. Integrate `save_conversation()`
-28. Create "Past Conversations" tab
-29. Load and filter conversations
-30. Implement conversation replay view
-31. Test: Conversations persist and reload
+26. conversation' not in st.session_state:
+    st.session_state.conversation = []
+if 'scenario' not in st.session_state:
+    st.session_state.scenario = ""
+if 'client' not in st.session_state:
+    st.session_state.client = "Toyota"
+if 'running' not in st.session_state:
+    st.session_state.running = False
+if 'stop_requested' not in st.session_state:
+    st.session_state.stop_requested = False
+```
 
-#### Phase 7: Polish (Day 20-21)
+### State Transitions
 
-32. Add error handling for all API calls
-33. Improve loading states with spinners
-34. Add helpful tooltips and hints
-35. Test all user flows
-36. Fix bugs and edge cases
-
----
-
-## Testing Checklist
-
-### Manual Testing
-
-- [ ] App loads without errors
-- [ ] Client dropdown populates from Weaviate
-- [ ] Scenario description accepts text
-- [ ] "Generate Agents" calls LLM successfully
-- [ ] Agent cards display correctly
-- [ ] "Regenerate" produces different agents
-- [ ] "Run Simulation" starts conversation
-- [ ] Messages appear in real-time
-- [ ] Streaming shows token-by-token
-- [ ] Sentiment chart updates each turn
-- [ ] Turn counter increments correctly
-- [ ] Conversation ends at max turns or termination
-- [ ] "Save & Exit" persists conversation
-- [ ] Past conversations tab shows saved items
-- [ ] Filters work (client, date)
-- [ ] Conversation replay displays correctly
-- [ ] Export creates JSON file
+```
+Initial State (running=False, conversation=[])
+    ↓
+[User clicks Start] → running=True
+    ↓
+[Conversation streams] → conversation grows with messages
+    ↓
+[User clicks Stop OR max turns reached] → running=False, stop_requested=True
+    ↓
+[User clicks New] → conversation=[], scenario="", running=False
 - [ ] Human mode: chat input appears
 - [ ] Human mode: user can type and send
 - [ ] Human mode: AI responds to user
@@ -1421,3 +1262,120 @@ For questions about this UI specification, contact the project lead or refer to:
 ---
 
 **End of UI Specification**
+Completed ✅)
+
+1. ✅ Create `src/app.py` with page config
+2. ✅ Add two-column layout
+3. ✅ Add client dropdown (hardcoded list)
+4. ✅ Add scenario textarea
+5. ✅ Add max turns slider
+6. ✅ Add number of agents input
+7. ✅ Add Start/Stop/New buttons
+
+#### Phase 2: Backend Integration (Completed ✅)
+
+8. ✅ Create pre-configured agent pool (5 agents)
+9. ✅ Connect Start button to create agents
+10. ✅ Integrate MultiAgentOrchestrator
+11. ✅ Implement streaming conversation display
+12. ✅ Add real-time message updates
+
+#### Phase 3: Visual Feedback (Completed ✅)
+
+13. ✅ Add spinner with agent names
+14. ✅ Show loading state while agent thinks
+15. ✅ Display success/warning/error messages
+16. ✅ Handle stop functionality
+
+#### Phase 4: Polish (Completed ✅)
+
+17. ✅ Add error handling for API calls
+18. ✅ Improve loading states with spinners
+19. ✅ Test all user flows
+20. ✅ Fix bugs and edge cases
+
+### Not Implemented (Out of Scope for MVP)
+
+- ❌ Sentiment analysis and tracking
+- ❌ Past conversations feature
+- ❌ Conversation persistence to database
+- ❌ LLM-powered agent suggestion
+- ❌ Human participation mode
+- ❌ Advanced metrics dashboard (Current Implementation)
+
+- [x] App loads without errors
+- [x] Client dropdown shows 3 options (Toyota, Microsoft, HPE)
+- [x] Scenario description accepts text
+- [x] Max turns slider works (1-10)
+- [x] Number of agents input works (2-5)
+- [x] "Start Conversation" button initiates streaming
+- [x] Messages appear in real-time as agents respond
+- [x] Spinner shows which agent is thinking
+- [x] Stop button interrupts conversation mid-stream
+- [x] Conversation ends at max turns or when stopped
+- [x] "New Conversation" clears state and resets form
+- [x] Error messages show for connection issues
+- [x] App handles 2, 3, 4, and 5 agent conversations
+- [x] Round-robin turn-taking works correctly
+- [x] Messages display with agent name and company
+
+### Features Not Tested (Not Implemented)
+
+- [ ] ~~Sentiment chart updates~~
+- [ ] ~~Past conversations tab~~
+- [ ] ~~Conversation persistence~~
+- [ ] ~~Human participation mode~~
+- [ ] ~~Agent regeneration~~otential Phase 2 Features
+
+1. **Agent Customization**
+   - Allow users to edit agent names/roles/objectives
+   - Save custom agent configurations
+   - Import/export agent profiles
+
+2. **LLM-Powered Agent Generation**
+   - Use LLM to suggest agents based on scenario
+   - Dynamic agent creation from natural language
+
+3. **Human Participation Mode**
+   - Enable user to join as one of the agents
+   - Chat input for human responses
+   - Turn management for human/AI mix
+
+4. **Conversation Persistence**
+   - Save conversations to Weaviate
+   - Past conversations browser
+   - Replay and analysis features
+
+5. **Sentiment Analysis**
+   - Real-time sentiment tracking per message
+   - Sentiment charts over time
+   - Sentiment-based insights
+
+6. **Advanced Metrics**
+   - Response time tracking
+   - Token usage statistics
+   - Conversation quality scores
+
+7. **Export & Sharing**
+   - PDF export with formatting
+   - Markdown/JSON export
+   - Share conversation links
+
+### Current MVP Scope
+
+**Implemented:**
+- ✅ Simple 2-column layout
+- ✅ Pre-configured agent pool (5 agents)
+- ✅ Multi-agent support (2-5 agents)
+- ✅ Real-time streaming conversation
+- ✅ Visual feedback (spinners, status messages)
+- ✅ Stop/interrupt functionality
+- ✅ Basic error handling
+
+**Not Implemented (Future):**
+- ❌ Agent suggestion via LLM
+- ❌ Human participation
+- ❌ Conversation persistence
+- ❌ Past conversations
+- ❌ Sentiment analysis
+- ❌ Advanced metric

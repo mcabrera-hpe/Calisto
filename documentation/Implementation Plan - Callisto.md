@@ -2,14 +2,50 @@
 
 **Project:** Multi-Agent Conversation Simulator  
 **Version:** Alpha  
-**Date:** January 30, 2026  
+**Date:** January 30, 2026 (Updated: February 2, 2026)  
 **Timeline:** 2-3 weeks
+
+---
+
+## Current Status (Updated: February 2, 2026)
+
+### ✅ Completed
+- **Phase 1 (Days 1-3): Foundation & Infrastructure** - 100% Complete
+  - Docker environment fully configured and running (Weaviate 1.27.5, Ollama with llama3.1)
+  - Project structure established with Poetry
+  - Weaviate client upgraded to v4.19.0
+  - Streamlit UI foundation built with tabs and navigation
+  - Health check utilities implemented
+  - Weaviate collections created (Document with multi-tenancy, ConversationHistory)
+  - Tenants initialized (HPE, Toyota, Microsoft)
+  - Basic scenario wizard UI created
+  - Conversation display UI framework ready
+  
+### 🚧 In Progress
+- **Phase 2 (Days 4-6):** RAG Pipeline - Ready to start
+- **Phase 3 (Days 7-9):** Agent Core - Not started
+
+### 📋 Next Steps
+1. **Phase 2 (Days 4-6): Agent Core & LLM Integration** - Start here!
+   - Build Agent base class with Ollama integration
+   - Implement conversation orchestrator
+   - Connect to UI for real conversations
+2. Phase 3 (Days 7-9): LLM-Powered Scenario Generation
+3. Phase 4 (Days 10-12): RAG Pipeline (defer until agents working)
+
+### 📊 Overall Progress: ~20% Complete
+- Infrastructure: 100% ✅
+- Core Features: 5%
+- UI Framework: 40%
+- Documentation: 100%
 
 ---
 
 ## Overview
 
 This document outlines the phased implementation plan for building Callisto, a local multi-agent conversation simulator for rapid PoC development.
+
+**Implementation Strategy:** Build incrementally, test frequently, keep it simple.
 
 ---
 
@@ -23,26 +59,26 @@ This document outlines the phased implementation plan for building Callisto, a l
 ### Tasks
 
 #### Day 1: Project Setup
-- [ ] Create project directory structure
-- [ ] Initialize Poetry project with `pyproject.toml`
-- [ ] Create `docker-compose.dev.yml` with 3 services (app, weaviate, ollama)
-- [ ] Create basic `Dockerfile` for app container
-- [ ] Create `.dockerignore` and `.gitignore`
-- [ ] Test: `docker-compose up` successfully starts all containers
+- [x] Create project directory structure
+- [x] Initialize Poetry project with `pyproject.toml`
+- [x] Create `docker-compose.yml` with 3 services (app, weaviate, ollama)
+- [x] Create basic `Dockerfile` for app container
+- [x] Create `.dockerignore` and `.gitignore`
+- [x] Test: `docker-compose up` successfully starts all containers
 
 #### Day 2: Service Configuration
-- [ ] Configure Weaviate with multi-tenancy enabled
-- [ ] Pull Ollama models (llama3.1, nomic-embed-text)
-- [ ] Create health check scripts for each service
-- [ ] Create `scripts/init_weaviate.py` to initialize collections
-- [ ] Test: All health checks pass, Weaviate schema created
+- [x] Configure Weaviate with multi-tenancy enabled
+- [x] Pull Ollama models (llama3.1, nomic-embed-text)
+- [x] Create health check scripts for each service
+- [x] Create `scripts/init_weaviate.py` to initialize collections
+- [x] Test: All health checks pass, Weaviate schema created
 
 #### Day 3: Basic Connectivity
-- [ ] Create simple Streamlit app in `src/app.py` (Hello World)
-- [ ] Test HTTP connection to Ollama from app container
-- [ ] Test HTTP connection to Weaviate from app container
-- [ ] Create `.streamlit/config.toml` for UI customization
-- [ ] Test: Streamlit accessible at localhost:8501, can ping Ollama and Weaviate
+- [x] Create simple Streamlit app in `src/app.py` (Hello World)
+- [x] Test HTTP connection to Ollama from app container
+- [x] Test HTTP connection to Weaviate from app container
+- [x] Create `.streamlit/config.toml` for UI customization
+- [x] Test: Streamlit accessible at localhost:8501, can ping Ollama and Weaviate
 
 **Deliverables:**
 - Working Docker Compose environment
@@ -56,48 +92,49 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-## Phase 2: RAG Pipeline with LlamaIndex (Days 4-6)
+## Phase 2: Agent Core & LLM Integration (Days 4-6) 🚀 CURRENT PHASE
 
 ### Goals
-- Implement document ingestion
-- Set up multi-tenant vector storage
-- Create RAG retrieval tools
+- Build agent classes and orchestration
+- Implement direct Ollama calls
+- Get agents talking to each other autonomously
+- **Skip RAG for now** - agents can talk without external data
 
 ### Tasks
 
-#### Day 4: LlamaIndex Integration
-- [ ] Install LlamaIndex dependencies in Poetry
-- [ ] Create `src/rag/index.py` with Weaviate integration
-- [ ] Create `src/rag/retrieval.py` with RAGTool class
-- [ ] Test: Simple document embedding and storage
+#### Day 4: Agent Base Class
+- [ ] Create `src/agents/core.py` with simple Agent class
+- [ ] Implement `Agent.respond()` with direct Ollama HTTP calls
+- [ ] Test: Single agent responds to a message
+- [ ] Add basic system prompt support
 
-#### Day 5: Document Ingestion
-- [ ] Create `scripts/ingest_documents.py` CLI tool
-- [ ] Implement PDF and DOCX loading (LlamaIndex SimpleDirectoryReader)
-- [ ] Implement chunking with SentenceSplitter (512 tokens, 50 overlap)
-- [ ] Implement embedding via Ollama
-- [ ] Test: Ingest sample PDF, verify chunks in Weaviate
+#### Day 5: Orchestrator & Multi-Turn
+- [ ] Implement `MultiAgentOrchestrator` class in `core.py`
+- [ ] Add round-robin turn management
+- [ ] Implement conversation history tracking
+- [ ] Test: 2 agents have a 5-turn conversation (command line test)
 
-#### Day 6: Tenant Management & Retrieval
-- [ ] Create `src/utils/tenants.py` for company name slugification
-- [ ] Implement tenant auto-creation in ingestion script
-- [ ] Implement RAG query with tenant filtering
-- [ ] Create sample data for 3 companies (HPE, Toyota, Microsoft)
-- [ ] Test: Query retrieves only correct tenant's data
+#### Day 6: UI Integration
+- [ ] Connect orchestrator to Streamlit UI
+- [ ] Replace mock agent generation with real agent creation
+- [ ] Implement auto-run conversation when user clicks "Run Simulation"
+- [ ] Add streaming display (optional - can be basic first)
+- [ ] Test: End-to-end UI flow with real agent conversation
 
 **Deliverables:**
-- Functional document ingestion pipeline
-- Multi-tenant RAG retrieval working
-- Sample data loaded for 3 companies
+- Working Agent class with LLM integration
+- Basic orchestration for multi-turn conversations
+- Agents conversing in the UI
 
 **Acceptance:**
-- Run ingestion: `python scripts/ingest_documents.py --company HPE --path ./data/documents/hpe/`
-- Query RAG for "server specs" returns HPE-specific data only
-- Different tenants have isolated data
+- Create 2 agents via UI, click "Run Simulation"
+- Agents respond coherently using Ollama
+- Conversation completes without errors
+- Messages display in UI in real-time
 
 ---
 
-## Phase 3: Agent Core & LLM Integration (Days 7-9)
+## Phase 3: LLM-Powered Scenario Generation (Days 7-9)
 
 ### Goals
 - Build agent classes and orchestration
@@ -139,7 +176,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-## Phase 4: LLM-Powered Scenario Generation (Days 10-12)
+## Phase 4: RAG Pipeline with LlamaIndex (Days 10-12)
 
 ### Goals
 - Build scenario wizard UI
@@ -338,43 +375,45 @@ This document outlines the phased implementation plan for building Callisto, a l
 - [x] Docker Compose with 3 services configured
 - [x] All health checks passing
 - [x] Volume mounts for hot-reload and data persistence
-- [x] Ollama models downloaded and accessible
+- [x] Ollama models downloaded and accessible (llama3.1 confirmed)
 
 ### Core Features
-- [x] Document ingestion CLI tool
-- [x] Multi-tenant RAG with Weaviate
-- [x] Agent LLM calls with streaming
-- [x] Multi-agent orchestrator
-- [x] LLM-powered scenario generation
-- [x] Dynamic agent factory
+- [ ] Document ingestion CLI tool - Not yet implemented
+- [ ] Multi-tenant RAG with Weaviate - Not yet implemented
+- [ ] Agent LLM calls with streaming - Not yet implemented
+- [ ] Multi-agent orchestrator - Not yet implemented
+- [ ] LLM-powered scenario generation - Mock implementation only
+- [ ] Dynamic agent factory - Not yet implemented
 
 ### UI
-- [x] Scenario wizard (client, description, participate)
-- [x] Agent preview and regeneration
-- [x] Real-time conversation display
-- [x] Sentiment chart
-- [x] Past conversations tab
-- [x] Human input mode
+- [x] Scenario wizard (client, description, participate) - Basic UI implemented
+- [x] Agent preview and regeneration - Mock functionality
+- [x] Real-time conversation display - UI structure ready
+- [ ] Sentiment chart - Placeholder only
+- [x] Past conversations tab - UI ready, no data yet
+- [x] Human input mode - UI structure ready
 
 ### Data & Persistence
-- [x] Weaviate collections initialized
-- [x] Conversations saved to Weaviate
-- [x] JSON exports created
-- [x] Sample data for 3 companies
+- [x] Weaviate collections initialized - Document & ConversationHistory created
+- [x] Multi-tenant setup complete - HPE, Toyota, Microsoft tenants active
+- [ ] Conversations saved to Weaviate - Not yet implemented
+- [ ] JSON exports created - Not yet implemented
+- [ ] Sample data for 3 companies - Not yet ingested
 
 ### Documentation
-- [x] README with setup instructions
+- [x] README with setup instructions - Comprehensive documentation
 - [x] Business Requirements Document
 - [x] Technical Requirements Document
 - [x] Implementation Plan (this document)
+- [x] UI Specification
 
 ### Testing
-- [x] 2-agent autonomous conversation works
-- [x] 4-agent multi-party conversation works
-- [x] Human participation mode works
-- [x] RAG retrieves correct tenant data
-- [x] Sentiment analysis functional
-- [x] Conversation replay works
+- [ ] 2-agent autonomous conversation works - Not yet testable
+- [ ] 4-agent multi-party conversation works - Not yet testable
+- [ ] Human participation mode works - UI ready, no backend
+- [ ] RAG retrieves correct tenant data - Not yet implemented
+- [ ] Sentiment analysis functional - Placeholder only
+- [ ] Conversation replay works - UI ready, no backend
 
 ---
 

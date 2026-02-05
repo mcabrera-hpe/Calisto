@@ -1,6 +1,6 @@
 services:
   weaviate:
-    image: semitechnologies/weaviate:1.24.0
+    image: semitechnologies/weaviate:latest
     container_name: callisto-weaviate
     ports:
       - "8080:8080"
@@ -8,8 +8,8 @@ services:
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      ENABLE_MODULES: ''
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-ollama'
+      ENABLE_MODULES: 'text2vec-ollama'
       CLUSTER_HOSTNAME: 'node1'
     volumes:
       - weaviate_data:/var/lib/weaviate
@@ -36,7 +36,7 @@ services:
     environment:
       - WEAVIATE_URL=http://weaviate:8080
       - OLLAMA_URL=http://ollama:11434
-      - DEFAULT_MODEL=llama3.1
+      - DEFAULT_MODEL=mistral
       - MAX_TURNS=30
     volumes:
       - ./src:/app/src
