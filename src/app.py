@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import os
 import json
 import logging
 from datetime import datetime
@@ -8,11 +7,12 @@ from datetime import datetime
 # Import agent classes
 from agents.core import Agent, MultiAgentOrchestrator
 
+# Import shared configuration
+from utils.config import WEAVIATE_URL, OLLAMA_URL, DEFAULT_MODEL, MAX_TURNS
+from utils.logging_config import setup_logging
+
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 # Page configuration
@@ -22,12 +22,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# Environment variables
-WEAVIATE_URL = os.getenv("WEAVIATE_URL", "http://weaviate:8080")
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL")
-MAX_TURNS = int(os.getenv("MAX_TURNS", "30"))
 
 # Initialize session state
 if 'conversation' not in st.session_state:
@@ -45,102 +39,40 @@ if 'stop_requested' not in st.session_state:
 # UTILITY FUNCTIONS
 # ============================================================================
 
-def check_weaviate_health():
-    """Check if Weaviate is accessible"""
-    try:
-        response = requests.get(f"{WEAVIATE_URL}/v1/.well-known/ready", timeout=5)
-        return response.status_code == 200
-    except Exception as e:
-        logger.error(f"Weaviate health check failed: {e}")
-        return False
-
-def check_ollama_health():
-    """Check if Ollama is accessible"""
-    try:
-        response = requests.get(f"{OLLAMA_URL}/api/tags", timeout=5)
-        return response.status_code == 200
-    except Exception as e:
-        logger.error(f"Ollama health check failed: {e}")
-        return False
-
-def list_tenants():
-    """Get list of available client companies from Weaviate"""
-    # Placeholder - will be implemented with Weaviate integration
-    return ["HPE", "Toyota", "Microsoft"]
-
-def run_simulation(agent_configs: list, initial_message: str, max_turns: int = 3):
-    """Run the multi-agent simulation"""
-    logger.info(f"Starting simulation with {len(agent_configs)} agents")
+def create_agent(index: int, client: str) -> Agent:
+    """Factory function to create agents based on index.
     
-    # Create Agent instances from configs
-    agents = []
-    for config in agent_configs:
-        if not config.get('is_human'):  # Skip human agents for now
-            agent = Agent(
-                name=config['name'],
-                company=config['company'],
-                role=config['role'],
-                objective=config['objective'],
-                model=DEFAULT_MODEL
-            )
-            agents.append(agent)
-    
-    # Create orchestrator and run conversation
-    orchestrator = MultiAgentOrchestrator(agents=agents, max_turns=max_turns)
-    conversation_history = orchestrator.run(initial_message=initial_message)
-    
-    return conversation_history
+    Args:
+        index: Agent index (0-4)
+        client: Client company name
+        
+    Returns:
+        Configured Agent instance
+    """
+    agent_configs = [
+        ("Sarah", "HPE", "Sales Engineer", "Sell servers and close the deal"),
+        ("Yuki", client, "IT Procurement Manager", "Get the best price and terms"),
+        ("Marcus", client, "Technical Lead", "Ensure technical requirements are met"),
+        ("Lisa", "HPE", "Account Manager", "Build relationship and ensure customer satisfaction"),
+        ("Ken", client, "CFO", "Minimize costs and maximize ROI")
+    ]
+    name, company, role, objective = agent_configs[index]
+    return Agent(name, company, role, objective, DEFAULT_MODEL)
 
-def suggest_agents_llm(scenario: str, client: str, include_human: bool):
-    """Use LLM to suggest agent configurations based on scenario"""
-    # Placeholder for LLM-powered agent suggestion
-    # This will call Ollama with few-shot prompts
+def display_conversation(messages: list) -> None:
+    """Display conversation messages in Streamlit chat format.
     
-    logger.info(f"Generating agents for scenario: {scenario}")
-    
-    # Mock response for now
-    if include_human:
-        return [
-            {
-                "name": "You",
-                "company": "HPE",
-                "role": "Sales Engineer",
-                "objective": "Close the deal with favorable terms",
-                "is_human": True,
-                "tools": ["rag"]
-            },
-            {
-                "name": "Yuki Tanaka",
-                "company": client,
-                "role": "IT Procurement Manager",
-                "objective": "Secure best price and service terms",
-                "is_human": False,
-                "tools": ["rag"]
-            }
-        ]
-    else:
-        return [
-            {
-                "name": "Sarah Chen",
-                "company": "HPE",
-                "role": "Sales Engineer",
-                "objective": "Sell server infrastructure",
-                "is_human": False,
-                "tools": ["rag"]
-            },
-            {
-                "name": "Yuki Tanaka",
-                "company": client,
-                "role": "IT Procurement Manager",
-                "objective": "Negotiate best terms for server purchase",
-                "is_human": False,
-                "tools": ["rag"]
-            }
-        ]
-
-# ============================================================================
-# MAIN APP
-# ============================================================================
+    Args:
+        messages: List of message dicts with agent, company, message, and optional generation_time
+    """
+    for msg in messages:
+        with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
+            gen_time = msg.get('generation_time')
+            if gen_time:
+                st.markdown(f"**{msg['agent']}** ({msg['company']}) - *{gen_time:.2f}s*")
+            else:
+                st.markdown(f"**{msg['agent']}** ({msg['company']})")
+            st.write(msg['message'])
 
 # Header
 st.title("🤖 Callisto")
@@ -202,50 +134,7 @@ with col2:
     # Conversation container
     if st.session_state.running:
         # Create agents dynamically based on num_agents
-        agent_configs = [
-            {
-                "name": "Sarah",
-                "company": "HPE",
-                "role": "Sales Engineer",
-                "objective": "Sell servers and close the deal"
-            },
-            {
-                "name": "Yuki",
-                "company": client,
-                "role": "IT Procurement Manager",
-                "objective": "Get the best price and terms"
-            },
-            {
-                "name": "Marcus",
-                "company": client,
-                "role": "Technical Lead",
-                "objective": "Ensure technical requirements are met"
-            },
-            {
-                "name": "Lisa",
-                "company": "HPE",
-                "role": "Account Manager",
-                "objective": "Build relationship and ensure customer satisfaction"
-            },
-            {
-                "name": "Ken",
-                "company": client,
-                "role": "CFO",
-                "objective": "Minimize costs and maximize ROI"
-            }
-        ]
-        
-        # Create only the number of agents requested
-        agents = []
-        for i in range(num_agents):
-            config = agent_configs[i]
-            agents.append(Agent(
-                name=config["name"],
-                company=config["company"],
-                role=config["role"],
-                objective=config["objective"],
-                model=DEFAULT_MODEL
-            ))
+        agents = [create_agent(i, client) for i in range(num_agents)]
         
         # Run streaming conversation
         orchestrator = MultiAgentOrchestrator(
@@ -262,15 +151,7 @@ with col2:
                 
                 # Display all messages so far
                 with message_placeholder.container():
-                    for msg in st.session_state.conversation:
-                        with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
-                            # Show agent name and generation time if available
-                            gen_time = msg.get('generation_time')
-                            if gen_time:
-                                st.markdown(f"**{msg['agent']}** ({msg['company']}) - *{gen_time:.2f}s*")
-                            else:
-                                st.markdown(f"**{msg['agent']}** ({msg['company']})")
-                            st.write(msg['message'])
+                    display_conversation(st.session_state.conversation)
                 
                 # Show who's next with a spinner
                 current_turn = len(st.session_state.conversation)
@@ -298,15 +179,7 @@ with col2:
     
     elif st.session_state.conversation:
         # Display saved conversation
-        for msg in st.session_state.conversation:
-            with st.chat_message("assistant" if msg['company'] == "HPE" else "user"):
-                # Show agent name and generation time if available
-                gen_time = msg.get('generation_time')
-                if gen_time:
-                    st.markdown(f"**{msg['agent']}** ({msg['company']}) - *{gen_time:.2f}s*")
-                else:
-                    st.markdown(f"**{msg['agent']}** ({msg['company']})")
-                st.write(msg['message'])
+        display_conversation(st.session_state.conversation)
     else:
         st.info("👈 Configure the scenario and click Start to begin")
 

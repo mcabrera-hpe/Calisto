@@ -7,7 +7,7 @@
 
 ---
 
-## Current Status (Updated: February 2, 2026)
+## Current Status (Updated: February 5, 2026)
 
 ### ✅ Completed
 - **Phase 1 (Days 1-3): Foundation & Infrastructure** - 100% Complete
@@ -20,24 +20,44 @@
   - Tenants initialized (HPE, Toyota, Microsoft)
   - Basic scenario wizard UI created
   - Conversation display UI framework ready
+
+- **Phase 2 (Days 4-6): Agent Core & LLM Integration** - 100% Complete
+  - Agent base class with Ollama HTTP integration (src/agents/core.py)
+  - MultiAgentOrchestrator with round-robin turn management
+  - HumanAgent placeholder class
+  - Conversation history tracking
+  - Termination logic with keyword detection
+  - Streaming conversation support (run_streaming)
+  - Full integration with Streamlit UI
+  - Real-time conversation display with agent metadata
+  - Dynamic agent creation (2-5 agents)
+  - Stop/restart conversation controls
   
 ### 🚧 In Progress
-- **Phase 2 (Days 4-6):** RAG Pipeline - Ready to start
-- **Phase 3 (Days 7-9):** Agent Core - Not started
+- **Phase 3 (Days 7-9):** LLM-Powered Scenario Generation - Mock only
+- **Phase 4 (Days 10-12):** RAG Pipeline - Not started
 
-### 📋 Next Steps
-1. **Phase 2 (Days 4-6): Agent Core & LLM Integration** - Start here!
-   - Build Agent base class with Ollama integration
-   - Implement conversation orchestrator
-   - Connect to UI for real conversations
-2. Phase 3 (Days 7-9): LLM-Powered Scenario Generation
-3. Phase 4 (Days 10-12): RAG Pipeline (defer until agents working)
+### 📋 Next Steps (Priority Order)
+1. **FastAPI Backend Split** - Minimal API wrapper for cloud deployment readiness (~1 day)
+2. **LLM-powered agent suggestion** - Replace mock suggest_agents_llm() with real LLM call
+3. **RAG Pipeline** - Document ingestion, LlamaIndex integration, multi-tenant retrieval
+4. **Conversation persistence** - Save to Weaviate and JSON exports
+5. **Sentiment analysis** - Real-time scoring with transformers
+6. **Human-in-loop** - Connect HumanAgent to Streamlit chat_input
 
-### 📊 Overall Progress: ~20% Complete
+### 📊 Overall Progress: ~40% Complete
 - Infrastructure: 100% ✅
-- Core Features: 5%
-- UI Framework: 40%
-- Documentation: 100%
+- Core Agent System: 90% ✅ (missing: LLM agent generation)
+- UI Framework: 70% ✅ (missing: sentiment chart, human input)
+- Backend API: 0% (Phase 9 planned)
+- RAG Pipeline: 0%
+- Persistence: 0%
+- Documentation: 100% ✅
+
+### 🎯 Next Milestone: Phase 9 - FastAPI Backend Split
+**Goal:** Cloud-ready API architecture  
+**Timeline:** 1 day  
+**Complexity:** Minimal (~100 new lines, POC-compliant)
 
 ---
 
@@ -92,7 +112,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-## Phase 2: Agent Core & LLM Integration (Days 4-6) 🚀 CURRENT PHASE
+## Phase 2: Agent Core & LLM Integration (Days 4-6) ✅ COMPLETED
 
 ### Goals
 - Build agent classes and orchestration
@@ -103,34 +123,37 @@ This document outlines the phased implementation plan for building Callisto, a l
 ### Tasks
 
 #### Day 4: Agent Base Class
-- [ ] Create `src/agents/core.py` with simple Agent class
-- [ ] Implement `Agent.respond()` with direct Ollama HTTP calls
-- [ ] Test: Single agent responds to a message
-- [ ] Add basic system prompt support
+- [x] Create `src/agents/core.py` with simple Agent class
+- [x] Implement `Agent.respond()` with direct Ollama HTTP calls
+- [x] Test: Single agent responds to a message
+- [x] Add basic system prompt support
 
 #### Day 5: Orchestrator & Multi-Turn
-- [ ] Implement `MultiAgentOrchestrator` class in `core.py`
-- [ ] Add round-robin turn management
-- [ ] Implement conversation history tracking
-- [ ] Test: 2 agents have a 5-turn conversation (command line test)
+- [x] Implement `MultiAgentOrchestrator` class in `core.py`
+- [x] Add round-robin turn management
+- [x] Implement conversation history tracking
+- [x] Test: 2 agents have a 5-turn conversation (command line test)
 
 #### Day 6: UI Integration
-- [ ] Connect orchestrator to Streamlit UI
-- [ ] Replace mock agent generation with real agent creation
-- [ ] Implement auto-run conversation when user clicks "Run Simulation"
-- [ ] Add streaming display (optional - can be basic first)
-- [ ] Test: End-to-end UI flow with real agent conversation
+- [x] Connect orchestrator to Streamlit UI
+- [x] Replace mock agent generation with real agent creation
+- [x] Implement auto-run conversation when user clicks "Start Conversation"
+- [x] Add streaming display with run_streaming()
+- [x] Test: End-to-end UI flow with real agent conversation
+- [x] Added: Dynamic 2-5 agent support
+- [x] Added: Stop/restart controls
+- [x] Added: Generation time display per message
 
 **Deliverables:**
-- Working Agent class with LLM integration
-- Basic orchestration for multi-turn conversations
-- Agents conversing in the UI
+- ✅ Working Agent class with LLM integration
+- ✅ Basic orchestration for multi-turn conversations
+- ✅ Agents conversing in the UI
 
 **Acceptance:**
-- Create 2 agents via UI, click "Run Simulation"
-- Agents respond coherently using Ollama
-- Conversation completes without errors
-- Messages display in UI in real-time
+- ✅ Create 2-5 agents via UI, click "Start Conversation"
+- ✅ Agents respond coherently using Ollama
+- ✅ Conversation completes without errors
+- ✅ Messages display in UI in real-time with streaming
 
 ---
 
@@ -369,19 +392,81 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
+## Phase 9: FastAPI Backend Split (Day 22)
+
+### Goals
+- Decouple UI from agent logic for cloud deployment readiness
+- Create minimal REST API wrapper (POC-compliant: ~100 lines)
+- Enable future external API access
+- Maintain local development workflow
+
+### Tasks
+
+#### Day 22: FastAPI Implementation
+- [ ] Add dependencies: `fastapi`, `uvicorn[standard]` to pyproject.toml
+- [ ] Create `backend/` package structure
+- [ ] Implement `backend/main.py` with FastAPI app (~50 lines)
+  - `POST /api/conversations/run` - Execute conversation, return full result
+  - `GET /api/conversations/{id}` - Get saved conversation from Weaviate
+  - `POST /api/agents/suggest` - LLM-based agent suggestion (placeholder)
+  - `GET /api/health` - Health check (Ollama, Weaviate, Redis status)
+- [ ] Create `backend/models.py` with Pydantic schemas (~50 lines)
+  - `ConversationRequest`, `ConversationResponse`, `AgentConfig`, `MessageSchema`
+- [ ] Update docker-compose.yml: Add `backend` service (port 8000)
+- [ ] Refactor Streamlit app.py to call FastAPI endpoints
+  - Replace direct Agent/Orchestrator imports with httpx API client
+  - Keep UI rendering logic, remove business logic
+- [ ] Update Makefile: Add `make logs-backend`, `make test-api`
+- [ ] Test: End-to-end flow through API
+
+**Architecture Change:**
+```
+Before: Browser → Streamlit (UI + Logic) → Ollama
+After:  Browser → Streamlit (UI only) → FastAPI (Logic) → Ollama
+```
+
+**Deliverables:**
+- Working FastAPI backend with REST endpoints
+- Streamlit as pure API client
+- OpenAPI documentation at http://localhost:8000/docs
+- Cloud-ready API (same code works locally + cloud)
+
+**Acceptance:**
+- `curl -X POST http://localhost:8000/api/conversations/run` returns conversation
+- Streamlit UI works identically through API
+- OpenAPI docs accessible and accurate
+- No agent imports in app.py
+
+**POC Compliance:**
+- Total new code: ~100 lines (backend/main.py + models.py)
+- Modified code: ~50 lines (app.py API client refactor)
+- New containers: 1 (backend)
+- Timeline: 1 day
+- Philosophy: Minimal wrapper, defer complexity (no async workers yet)
+
+---
+
 ## Alpha Release Checklist
 
 ### Infrastructure
 - [x] Docker Compose with 3 services configured
+- [ ] Docker Compose with 4 services (+ backend) - Phase 9
 - [x] All health checks passing
 - [x] Volume mounts for hot-reload and data persistence
 - [x] Ollama models downloaded and accessible (llama3.1 confirmed)
 
+### Backend API (Phase 9)
+- [ ] FastAPI application created with core endpoints
+- [ ] Pydantic models for request/response validation
+- [ ] OpenAPI documentation accessible at /docs
+- [ ] Health check endpoint functional
+- [ ] CORS configured for Streamlit access
+
 ### Core Features
 - [ ] Document ingestion CLI tool - Not yet implemented
 - [ ] Multi-tenant RAG with Weaviate - Not yet implemented
-- [ ] Agent LLM calls with streaming - Not yet implemented
-- [ ] Multi-agent orchestrator - Not yet implemented
+- [x] Agent LLM calls working - Phase 2 complete
+- [x] Multi-agent orchestrator - Phase 2 complete
 - [ ] LLM-powered scenario generation - Mock implementation only
 - [ ] Dynamic agent factory - Not yet implemented
 
@@ -408,8 +493,10 @@ This document outlines the phased implementation plan for building Callisto, a l
 - [x] UI Specification
 
 ### Testing
-- [ ] 2-agent autonomous conversation works - Not yet testable
-- [ ] 4-agent multi-party conversation works - Not yet testable
+- [x] 2-agent autonomous conversation works - Phase 2 complete
+- [x] 4-agent multi-party conversation works - Phase 2 complete
+- [ ] Conversation works through API (Phase 9)
+- [ ] OpenAPI schema validates all endpoints (Phase 9)
 - [ ] Human participation mode works - UI ready, no backend
 - [ ] RAG retrieves correct tenant data - Not yet implemented
 - [ ] Sentiment analysis functional - Placeholder only
@@ -419,7 +506,115 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ## Future Phases
 
-### Phase 2: Enhanced Capabilities (Post-Alpha)
+### Phase 2: Concurrent Multi-Scenario Execution (Cloud Scalability)
+
+**Timeline:** 8-10 days  
+**Priority:** High (when deploying to cloud with concurrent traffic)
+
+**Context:** Phase 9 creates a synchronous API suitable for single-user POC and low-traffic cloud deployments. This phase adds infrastructure for handling **multiple simultaneous conversation requests** from different clients/users.
+
+**When to implement:**
+- Deploying to cloud with >5 concurrent users
+- Need non-blocking conversation execution
+- Multiple API clients making simultaneous requests
+- Real-time token streaming required (word-by-word)
+
+**Architecture Evolution:**
+```
+Phase 9 (Synchronous):  Client → FastAPI → Agent (blocks) → Ollama
+Phase 2 (Async):        Client → FastAPI → Redis Queue → Celery Workers → Ollama
+                                    ↓                        ↓
+                                  SSE Stream ← Redis Pub/Sub ← Tokens
+```
+
+**Features:**
+- [ ] **Async Task Queue**
+  - Add Redis service to docker-compose.yml
+  - Install Celery with Redis broker
+  - Create `backend/tasks.py` with `run_conversation` Celery task (~80 lines)
+  - Worker container executes conversations in background
+  - API returns conversation_id immediately, doesn't block
+
+- [ ] **Real-Time Token Streaming**
+  - Modify `Agent.respond()` to use Ollama `stream=True` (~30 lines)
+  - Parse SSE stream from Ollama, yield tokens
+  - Publish tokens to Redis pub/sub channel `conversation:{id}`
+  - Create `backend/streaming.py` with SSE endpoint (~100 lines)
+  - `GET /api/conversations/{id}/stream` - Server-Sent Events endpoint
+  - Frontend consumes SSE stream for word-by-word display
+
+- [ ] **Conversation State Management**
+  - Redis as state cache (running conversations, metadata)
+  - Weaviate for persistence (completed conversations)
+  - `POST /api/conversations/{id}/stop` - Cancel running conversation
+  - Handle worker timeout, cleanup, error recovery
+
+- [ ] **Worker Orchestration**
+  - Celery worker container (separate from API)
+  - Task routing, priority queues
+  - Configurable worker count (horizontal scaling)
+  - Health monitoring via `celery inspect`
+
+**Infrastructure Changes:**
+```yaml
+# docker-compose.yml additions
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  
+  worker:
+    build: .
+    command: celery -A backend.celery_app worker --loglevel=info
+    depends_on: [redis, ollama, weaviate]
+```
+
+**New Dependencies:**
+- `celery[redis] ^5.3.0`
+- `redis ^5.0.0`
+- `sse-starlette ^1.8.0` (for SSE streaming)
+
+**Code Additions:**
+- `backend/celery_app.py`: Celery configuration (~40 lines)
+- `backend/tasks.py`: Async conversation task (~80 lines)
+- `backend/streaming.py`: SSE streaming logic (~100 lines)
+- `src/agents/core.py`: Token streaming support (~30 lines modified)
+- `docker-compose.yml`: Redis + worker services (~20 lines)
+
+**Total Complexity:**
+- New code: ~250 lines
+- Modified code: ~80 lines
+- New containers: +2 (redis, worker)
+- New dependencies: 3 packages
+
+**Testing Scenarios:**
+1. **Concurrent conversations**: 5 clients start conversations simultaneously
+2. **Token streaming**: See LLM generate text word-by-word in real-time
+3. **Cancellation**: Stop conversation mid-execution, worker cleans up
+4. **Reconnection**: Client disconnects, reconnects to ongoing stream
+5. **Worker scaling**: Add 3 workers, verify load distribution
+
+**Acceptance Criteria:**
+- 10+ concurrent conversations execute without blocking
+- Tokens stream to UI within 100ms of generation
+- Stop button cancels worker task within 2 seconds
+- No memory leaks after 100+ conversations
+- Worker crashes don't lose conversation state
+
+**POC vs Production Trade-offs:**
+- **Skip for POC if:** Single user, local only, synchronous OK
+- **Implement when:** Cloud deployment, multiple users, UX requires real-time streaming
+- **Future optimization:** Model quantization, response caching, connection pooling
+
+**Deliverables:**
+- Scalable background job execution
+- Real-time streaming capability
+- Foundation for production deployment
+- Handles 50+ concurrent conversations
+
+---
+
+### Phase 3: Enhanced Capabilities (Post-Alpha)
 
 **Timeline:** 2-3 weeks  
 **Priority:** Medium
@@ -457,7 +652,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-### Phase 3: Advanced Analytics & Evaluation (Post-Alpha)
+### Phase 4: Advanced Analytics & Evaluation (Post-Alpha)
 
 **Timeline:** 3-4 weeks  
 **Priority:** High (for experimental work)
@@ -500,7 +695,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-### Phase 4: Collaboration & Sharing (Future)
+### Phase 5: Collaboration & Sharing (Future)
 
 **Timeline:** 4-5 weeks  
 **Priority:** Low (unless team adoption high)
@@ -517,17 +712,11 @@ This document outlines the phased implementation plan for building Callisto, a l
   - Comments and annotations
   - Performance leaderboards
 
-- [ ] API development
-  - REST API for external integrations
-  - Webhook support
-  - Programmatic scenario creation
-  - Bulk operations
-
-- [ ] Advanced UI
-  - React/Next.js frontend (replace Streamlit)
-  - Mobile-responsive design
-  - Dark mode
-  - Customizable dashboards
+- [ ] API enhancements
+  - Webhook support for conversation events
+  - Programmatic scenario creation endpoints
+  - Bulk operations API
+  - GraphQL interface (alternative to REST)
 
 **Deliverables:**
 - Multi-user platform
@@ -536,7 +725,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-### Phase 5: Production Hardening (Future)
+### Phase 6: Production Hardening (Future)
 
 **Timeline:** 6-8 weeks  
 **Priority:** Low (only if productionizing)
@@ -587,7 +776,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ---
 
-### Phase 6: Advanced Features (Future)
+### Phase 7: Advanced Features (Future)
 
 **Timeline:** Variable  
 **Priority:** As needed
@@ -615,6 +804,8 @@ This document outlines the phased implementation plan for building Callisto, a l
 | Weaviate memory overflow | Medium | Limit ingestion, document cleanup procedures | Developer |
 | Docker resource exhaustion | High | Document requirements, set resource limits | Developer |
 | Scope creep in Alpha | High | Strict adherence to checklist, defer extras to Phase 2+ | Developer |
+| API-UI coupling issues | Medium | Clear Pydantic contracts, comprehensive testing | Developer |
+| Premature optimization | High | Follow POC philosophy, add complexity only when needed | Developer |
 
 ### Dependencies
 
@@ -624,6 +815,8 @@ This document outlines the phased implementation plan for building Callisto, a l
 | Weaviate multi-tenancy | Stable (v1.24+) | Low | Fall back to collection-per-tenant |
 | LlamaIndex compatibility | Active development | Medium | Custom RAG implementation |
 | Streamlit limitations | Stable | Low | Migrate to Gradio if needed |
+| FastAPI ecosystem | Stable | Low | Flask alternative (simpler but less features) |
+| Celery + Redis (future) | Mature | Low | RQ (simpler) or serverless functions |
 
 ---
 
@@ -635,35 +828,49 @@ This document outlines the phased implementation plan for building Callisto, a l
 - 100% of core features working (scenario creation, conversation, persistence)
 - < 5% failure rate on agent generation
 - < 2% data loss on conversation save
+- API endpoints return valid responses with correct schemas
 
 **Performance:**
 - Setup time < 15 minutes (fresh install)
 - Scenario creation < 5 minutes
 - Agent response time < 10 seconds (95th percentile)
+- API response time < 200ms overhead (excluding LLM)
 
 **Usability:**
 - First-time user can run simulation without help
 - < 3 clicks to start conversation
 - Clear error messages for common issues
+- OpenAPI documentation accurate and complete
 
 **Quality:**
 - Agents respond coherently (manual evaluation)
 - RAG retrieves relevant data (>80% accuracy)
 - Sentiment scores correlate with message tone
+- API contracts validated with Pydantic
 
 ---
 
 ## Resource Requirements
 
 ### Development Time
-- **Alpha (Phases 1-8):** 21 days (~3 weeks)
-- **Phase 2:** 14 days (2-3 weeks)
-- **Phase 3:** 21 days (3-4 weeks)
+- **Alpha (Phases 1-9):** 22 days (~4 weeks)
+  - Core functionality: 21 days
+  - FastAPI backend split: 1 day
+- **Future Phase 2 (Scalability):** 8-10 days (when needed)
+- **Future Phase 3 (Enhanced Capabilities):** 14 days (2-3 weeks)
+- **Future Phase 4 (Analytics):** 21 days (3-4 weeks)
 - **Total to full-featured:** ~2-3 months
 
 ### Hardware
-- Development laptop: 8+ cores, 16GB RAM
-- Disk: 50GB free (for models and data)
+- **Development (Local POC):**
+  - 8+ CPU cores, 16GB RAM
+  - 50GB free disk (models and data)
+  
+- **Cloud Deployment (Future):**
+  - Backend API: 2 vCPU, 4GB RAM (Cloud Run, Lambda, ECS)
+  - Ollama: GPU instance (T4/A10, 16GB VRAM) or CPU optimized
+  - Weaviate: Managed service or 4GB RAM instance
+  - Redis: Managed service or 1GB RAM (if using workers)
 
 ### External Resources
 - None (fully local)
@@ -690,7 +897,7 @@ This document outlines the phased implementation plan for building Callisto, a l
 
 ```
 callisto/
-├── docker-compose.dev.yml
+├── docker-compose.yml
 ├── Dockerfile
 ├── pyproject.toml
 ├── poetry.lock
@@ -701,9 +908,14 @@ callisto/
 ├── .streamlit/
 │   └── config.toml
 │
+├── backend/                    # NEW (Phase 9)
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI app (~50 lines)
+│   └── models.py               # Pydantic schemas (~50 lines)
+│
 ├── src/
 │   ├── __init__.py
-│   ├── app.py                  # Streamlit UI
+│   ├── app.py                  # Streamlit UI (API client after Phase 9)
 │   │
 │   ├── agents/
 │   │   ├── __init__.py
@@ -732,26 +944,30 @@ callisto/
 │       ├── toyota/
 │       └── microsoft/
 │
-└── docs/                       # Documentation
-    ├── Business Requirements Document.md
-    ├── Technical Requirements Document.md
-    └── Implementation Plan.md (this file)
+└── documentation/              # Documentation
+    ├── Business Requirements Document - Callisto.md
+    ├── Technical Requirements Document - Callisto.md
+    ├── Implementation Plan - Callisto.md (this file)
+    └── UI Specification - Callisto.md
 ```
 
 ### B. Command Reference
 
 ```bash
 # Start services
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
 # View logs
-docker-compose logs -f app
+docker-compose logs -f app          # Frontend (Streamlit)
+docker-compose logs -f backend      # Backend (FastAPI) - Phase 9+
+docker-compose logs -f worker       # Worker (Celery) - Future Phase 2+
 
 # Stop services
 docker-compose down
 
 # Rebuild after dependency changes
 docker-compose build app
+docker-compose build backend  # Phase 9+
 
 # Pull Ollama models
 docker-compose exec ollama ollama pull llama3.1
@@ -764,8 +980,13 @@ docker-compose exec app python scripts/init_weaviate.py
 docker-compose exec app python scripts/ingest_documents.py \
   --company "HPE" --path /app/data/documents/hpe/
 
+# Test API (Phase 9+)
+curl http://localhost:8000/health
+curl http://localhost:8000/docs  # OpenAPI documentation
+
 # Access services
 # Streamlit: http://localhost:8501
+# FastAPI: http://localhost:8000 (Phase 9+)
 # Weaviate: http://localhost:8080
 # Ollama: http://localhost:11434
 ```
@@ -774,12 +995,12 @@ docker-compose exec app python scripts/ingest_documents.py \
 
 ```
 Week 1: Foundation
-├── Day 1-3: Infrastructure
-└── Day 4-6: RAG Pipeline
+├── Day 1-3: Infrastructure ✅
+└── Day 4-6: Agent Core & LLM Integration ✅
 
 Week 2: Core Features
-├── Day 7-9: Agent System
-├── Day 10-12: Scenario Generation
+├── Day 7-9: LLM Scenario Generation
+├── Day 10-12: RAG Pipeline
 └── Day 13-15: UI Development
 
 Week 3: Completion
@@ -787,5 +1008,14 @@ Week 3: Completion
 ├── Day 18-19: Human Mode
 └── Day 20-21: Polish & Docs
 
-Alpha Release: Day 21 ✓
+Week 4: Cloud-Ready Architecture
+└── Day 22: FastAPI Backend Split (Phase 9)
+
+Alpha Release: Day 22 ✓
+
+Future (When Needed):
+└── Concurrent Multi-Scenario Execution (~8-10 days)
+    ├── Async task queue (Celery + Redis)
+    ├── Real-time token streaming (SSE)
+    └── Worker orchestration
 ```

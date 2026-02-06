@@ -121,33 +121,14 @@ open http://localhost:8501
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│         Docker Compose Environment              │
-│                                                 │
-│  ┌──────────────┐  ┌──────────────┐           │
-│  │  Streamlit   │  │   Weaviate   │           │
-│  │     UI       │→│  Vector DB   │           │
-│  │              │  │  (Multi-tenant) │         │
-│  └──────┬───────┘  └──────────────┘           │
-│         │                                       │
-│         ↓                                       │
-│  ┌──────────────┐                              │
-│  │    Ollama    │                              │
-│  │  LLM Server  │                              │
-│  │  • llama3.1  │                              │
-│  │  • embeddings│                              │
-│  └──────────────┘                              │
-└─────────────────────────────────────────────────┘
-```
+**3-Container System:**
+- **app**: Streamlit UI + agent logic (Python 3.11)
+- **ollama**: LLM inference (llama3.1/mistral)
+- **weaviate**: Multi-tenant vector database
 
-**Data Flow:**
-1. User describes scenario in Streamlit
-2. LLM generates agent configurations
-3. Agents query Weaviate (RAG) for company-specific knowledge
-4. Agents generate responses via Ollama
-5. Sentiment analyzed and displayed in real-time
-6. Conversations saved to Weaviate + JSON exports
+**Data Flow:** User creates scenario → LLM generates agents → Agents use RAG (Weaviate) → Ollama generates responses → Real-time UI updates
+
+📖 For detailed architecture diagrams and integration points, see [.github/copilot-instructions.md](.github/copilot-instructions.md#architecture)
 
 ---
 
@@ -385,6 +366,28 @@ docker-compose exec app pytest
 
 ---
 
+## Code Quality
+
+This project uses **automated AI agents** for continuous quality improvement:
+
+- **`@quality` agent**: Analyzes codebase and generates [ProjectScore.md](documentation/ProjectScore.md) with detailed metrics
+- **`@fixer` agent**: Automatically applies improvements based on quality report
+- **Target**: 85%+ quality score (currently: 92.5%)
+
+The workflow runs iteratively (Quality → Fixer → Testing) until target is achieved. 
+
+📊 **Metrics tracked:**
+- Simplicity (file/function size)
+- DRY principle (code duplication)
+- SOLID principles (SRP)
+- Code standards (type hints, docstrings, logging)
+
+🔧 **Usage:** Invoke `@quality` in GitHub Copilot to trigger a quality audit and auto-fix cycle.
+
+See [.github/copilot-instructions.md](.github/copilot-instructions.md#ai-agents-for-code-quality) for complete workflow details.
+
+---
+
 ## Performance
 
 ### Expected Response Times (Alpha)
@@ -408,32 +411,9 @@ docker-compose exec app pytest
 
 ## Roadmap
 
-### ✅ Alpha (Current)
-- Dynamic scenario creation
-- Multi-agent conversations
-- Human participation mode
-- Real-time sentiment tracking
-- Conversation persistence
+**Current Status:** ~40% complete (Phases 1-2 done, RAG/persistence in progress)
 
-### 🔄 Phase 2 (Next)
-- Scenario template library
-- Agent role presets
-- Advanced sentiment (emotions)
-- Export to PDF/Markdown
-
-### 📋 Phase 3 (Future)
-- Phoenix observability
-- MLflow experiment tracking
-- RAGAS evaluation metrics
-- A/B testing framework
-
-### 🚀 Phase 4+ (Backlog)
-- Multi-user support
-- Team collaboration
-- Production deployment
-- API for integrations
-
-See [Implementation Plan](docs/Implementation%20Plan%20-%20Callisto.md) for details.
+📋 For detailed roadmap, timelines, and task checklists, see [Implementation Plan](documentation/Implementation%20Plan%20-%20Callisto.md)
 
 ---
 
@@ -466,19 +446,6 @@ Comprehensive documentation in `docs/`:
 - **[Business Requirements](docs/Business%20Requirements%20Document%20-%20Callisto.md)** - Why this exists, use cases, goals
 - **[Technical Requirements](docs/Technical%20Requirements%20Document%20-%20Callisto.md)** - Architecture, APIs, data models
 - **[Implementation Plan](docs/Implementation%20Plan%20-%20Callisto.md)** - Development roadmap, phases, timelines
-
----
-
-## Contributing
-
-This is a personal project for rapid PoC development. Not currently accepting external contributions.
-
-If you find this useful and want to adapt it:
-1. Fork the repository
-2. Customize for your use case
-3. Share your learnings!
-
----
 
 ## License
 

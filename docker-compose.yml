@@ -42,6 +42,7 @@ services:
       - ./src:/app/src
       - ./scripts:/app/scripts
       - ./data:/app/data
+      - ./documentation:/app/documentation
       - ./.streamlit:/app/.streamlit
     depends_on:
       - weaviate

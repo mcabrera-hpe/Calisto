@@ -9,24 +9,21 @@ This script creates the necessary collections (classes) in Weaviate:
 Run this script once after starting Weaviate for the first time.
 """
 
-import os
 import sys
-import logging
 from typing import Optional
 
 import weaviate
 from weaviate.classes.config import Configure, Property, DataType
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+sys.path.insert(0, '/app/src')
 
-# Environment variables
-WEAVIATE_URL = os.getenv("WEAVIATE_URL", "http://weaviate:8080")
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+from utils.config import WEAVIATE_URL, OLLAMA_URL
+from utils.logging_config import setup_logging
+
+# Configure logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 
 
 def connect_to_weaviate() -> weaviate.WeaviateClient:
@@ -265,7 +262,7 @@ def verify_setup(client: weaviate.WeaviateClient) -> None:
         raise
 
 
-def main():
+def main() -> None:
     """Main function to initialize Weaviate."""
     logger.info("=" * 60)
     logger.info("Initializing Weaviate for Callisto")
