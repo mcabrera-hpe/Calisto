@@ -38,48 +38,54 @@ def respond(self, conversation_history: List[Dict]) -> tuple[str, float]:
 ## Architecture
 
 ### Container Structure
-- **app**: Streamlit UI + agent logic (Python 3.11, Poetry)
+- **app**: Streamlit UI (Python 3.11, Poetry) - Frontend client
+- **api**: FastAPI REST API (Python 3.11, Poetry) - Backend service
 - **ollama**: LLM inference (mistral/llama3.1 models)
 - **weaviate**: Multi-tenant vector database for RAG
 
 See [docker-compose.yml](docker-compose.yml) for service definitions and networking.
 
 ### Key Components
-- **Agent classes** ([src/agents/core.py](src/agents/core.py)): `Agent` (AI), `HumanAgent` (placeholder), `MultiAgentOrchestrator` (conversation manager)
-- **UI layer** ([src/app.py](src/app.py)): Streamlit interface with session state management
+- **Agent classes** ([src/agents/base.py](src/agents/base.py), [src/agents/orchestrator.py](src/agents/orchestrator.py)): `Agent` (AI), `HumanAgent` (placeholder), `MultiAgentOrchestrator` (conversation manager)
+- **API layer** ([src/api/main.py](src/api/main.py)): FastAPI backend with 4 REST endpoints
+- **UI layer** ([src/app.py](src/app.py)): Streamlit interface that calls API
 - **RAG pipeline**: LlamaIndex + Weaviate (multi-tenancy per company)
 
 ### Data Flow
-1. User creates scenario → LLM suggests agents
-2. Orchestrator runs round-robin conversation
-3. Each agent calls Ollama `/api/chat` endpoint
-4. Responses logged to session state + optionally Weaviate
-5. UI updates in real-time via streaming
+1. User creates scenario in Streamlit UI
+2. UI sends POST to `/conversations` API endpoint
+3. API creates agents and orchestrator
+4. UI starts streaming via POST to `/conversations/{id}/start`
+5. API streams conversation via Server-Sent Events (SSE)
+6. Each agent calls Ollama `/api/chat` endpoint
+7. Responses streamed back to UI in real-time
+8. Conversation stored in API memory (resets on restart)
 
 ## Configuration
 
 ### Environment Variables
 All configuration via env vars - **never hardcode URLs or models**:
-- `OLLAMA_URL`: Default `http://ollama:11434`
-- `WEAVIATE_URL`: Default `http://weaviate:8080`
+- `OLLAMA_URL`: Default `http://ollama:11434` (used by API service)
+- `WEAVIATE_URL`: Default `http://weaviate:8080` (used by API service)
 - `DEFAULT_MODEL`: LLM model name (e.g., `mistral`, `llama3.1`)
 - `MAX_TURNS`: Conversation limit (default `30`)
+- `API_URL`: Frontend calls backend at `http://api:8000` (Docker service name)
 
-See pattern in [src/agents/core.py](src/agents/core.py):
+See pattern in [src/agents/base.py](src/agents/base.py):
 ```python
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL")
 ```
 
+Frontend API connection in [src/app.py](src/app.py):
+```python
+API_URL = "http://api:8000"  # Docker service name
+```
+
 ## Build and Test
 
-### Development Workflow
-```bash
-# Start all services (detached)
-docker-compose up -d
-
-# View logs
-make logs-app        # App logs only
+### Development WorkfloFrontend logs only
+make logs api        # Backend logs only
 make logs            # All services
 
 # Restart after code changes (volumes auto-sync)
@@ -91,6 +97,21 @@ make build
 # Stop and clean
 make down            # Stop containers
 make clean           # Remove volumes too
+```
+
+### Testing
+```bash
+# Test API endpoints directly
+curl http://localhost:8000/
+curl -X POST http://localhost:8000/conversations \
+  -H "Content-Type: application/json" \
+  -d '{"scenario":"Test","client":"Toyota","num_agents":2,"max_turns":2}'
+
+# Test API from inside container
+docker-compose exec api python scripts/test_api.py
+
+# Test agents
+docker-compose exec apiRemove volumes too
 ```
 
 ### Testing
@@ -130,7 +151,20 @@ except requests.exceptions.Timeout:
 ```
 
 ### Conversation Termination
-Simple keyword detection in orchestrator (`_should_terminate()`) - looks for "deal", "agreed", "contract", etc. in last message.
+SimpFastAPI Backend
+- **Base URL**: `http://api:8000` (Docker service) or `http://localhost:8000` (host)
+- **Endpoints**:
+  - `GET /`: Health check
+  - `POST /conversations`: Create conversation, returns `{conversation_id: uuid}`
+  - `GET /conversations/{id}`: Get conversation details and history
+  - `POST /conversations/{id}/start`: Start conversation streaming via SSE
+  - `DELETE /conversations/{id}`: Delete conversation
+- **Storage**: In-memory dict (POC - cleared on restart)
+- **Streaming**: Server-Sent Events (SSE) with `data: {json}\n\n` format
+
+See [src/api/main.py](src/api/main.py) for implementation.
+
+### le keyword detection in orchestrator (`_should_terminate()`) - looks for "deal", "agreed", "contract", etc. in last message.
 
 ### Streaming vs Batch
 - `run()`: Returns full conversation history
@@ -150,7 +184,30 @@ Both methods in [MultiAgentOrchestrator](src/agents/core.py).
     "messages": [{"role": "system", "content": "..."}, ...],
     "stream": false,
     "options": {"temperature": 0.7, "num_predict": 200}
-  }
+  }Test the Full Stack
+```bash
+# 1. Start all services
+docker-compose up -d
+
+# 2. Test API health
+curl http://localhost:8000/
+
+# 3. Test conversation creation
+curl -X POST http://localhost:8000/conversations \
+  -H "Content-Type: application/json" \
+  -d '{"scenario":"Test negotiation","client":"Toyota","num_agents":2,"max_turns":2}'
+
+# 4. Open Streamlit UI
+open http://localhost:8501
+```
+
+### Add New API Endpoint
+1. Add route function in [src/api/main.py](src/api/main.py)
+2. Use Pydantic models for request/response
+3. Follow existing patterns (simple, minimal, POC-friendly)
+4. Test with curl before integrating with UI
+
+### 
   ```
 - **Response**: `{"message": {"content": "..."}}`
 

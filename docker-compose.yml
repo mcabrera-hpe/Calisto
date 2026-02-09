@@ -26,6 +26,30 @@ services:
     networks:
       - callisto-network
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: callisto-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app/src
+      - WEAVIATE_URL=http://weaviate:8080
+      - OLLAMA_URL=http://ollama:11434
+      - DEFAULT_MODEL=mistral
+      - MAX_TURNS=30
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+      - ./data:/app/data
+    depends_on:
+      - weaviate
+      - ollama
+    networks:
+      - callisto-network
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
   app:
     build:
       context: .
@@ -34,6 +58,7 @@ services:
     ports:
       - "8501:8501"
     environment:
+      - PYTHONPATH=/app/src
       - WEAVIATE_URL=http://weaviate:8080
       - OLLAMA_URL=http://ollama:11434
       - DEFAULT_MODEL=mistral
@@ -47,6 +72,7 @@ services:
     depends_on:
       - weaviate
       - ollama
+      - api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
       interval: 30s
@@ -55,7 +81,7 @@ services:
       start_period: 10s
     networks:
       - callisto-network
-    command: ["streamlit", "run", "src/app.py", "--server.address", "0.0.0.0"]
+    command: ["streamlit", "run", "src/ui/main.py", "--server.address", "0.0.0.0"]
 
 volumes:
   weaviate_data:

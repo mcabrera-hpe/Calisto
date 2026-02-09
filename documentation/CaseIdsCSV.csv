@@ -1,0 +1,92 @@
+Id,Traj.,Status,Case ID,SIE Case,Customer,Top Acc,Geo,Cntry/State
+TE-2410BY9BC,Improving,Monitoring,5384932763,SIE283614,Gabs AG,,Europe Central,Switzerland
+TE-2503DG9CP,Improving,Monitoring,5388811316,SIE290041,UBS Switzerland AG,,Europe Central,Switzerland
+TE-2505RK7CZ,Improving,Monitoring,5386965792,,Novartis Pharma AG,,Europe Central,Switzerland
+TE-2506VV4WL,Improving,Working,5388257854,SIE290029,Reseau National de Telecommunication Pour La Technologie D Enseignement et La Recherche (RENATER),,Europe North West,France
+TE-2507LX8LT,Neutral,Monitoring,5390822693,SIE293923,Societe Generale (SG),Yes,Europe North West,France
+TE-2507QD5VL,Neutral,Working,5391028834,SIE294054,"G2 Research, Inc.",,North America,Virginia
+TE-2507SF3SP,Improving,Working,5391102720,SIE294249,Ericsson AB,,Europe North West,Sweden
+TE-2508NB3HR,Neutral,Working,5390903014,SIE294848,HOSTINGER,,Europe North West,Lithuania
+TE-2509FV2WQ,Neutral,Working,5392421013,SIE297536,Kyndryl España SA.,,Europe South,Spain
+TE-2509PH7KT,Improving,Working,5392332246,SIE296698 ,Bundesrechenzentrum Gesellschaft mit beschränkter Haftung,,Europe Central,Austria
+TE-2509XN3YQ,Improving,Monitoring,5391904034,SIE298579,Belgacom International Carrier Services SA (BICS),,Europe North West,Belgium
+TE-2509ZS8HX,Neutral,Working,5392423463,SIE296192 ,Bosch Robert GmbH,,Europe Central,Germany
+TE-2510HB9GN,Improving,Monitoring,5392453034,SIE296615,BCE Inc (Bell Canada Enterprises),,North America,Ontario
+TE-2510KP6TL,Improving,Working,07411265,,Safran,,Europe North West,France
+TE-2510NC2MW,Improving,Monitoring,5392581138,SIE296749,Ceska Narodni Banka (CNB - Czech National Bank),,Europe Central,Czech Republic
+TE-2510QH5VC,Neutral,Working,5392402039,SIE296494,Airbus Operations,,Europe North West,France
+TE-2510VF5LB,Improving,Monitoring,5391154485,SIE294408,Edarat Group MIS,,UKIMEA,Saudi Arabia
+TE-2510WH8ZH,Improving,Monitoring,5392414922,SIE296483,EKT AG,,Europe Central,Switzerland
+TE-2510ZJ6BK,Neutral,Working,5391536098,SIE294950,Societe Generale (SG),Yes,Europe North West,France
+TE-2511CN2NN,Neutral,Monitoring,5393553766,SIE298537,HRTR Norway AS,,Europe North West,Norway
+TE-2511JZ4ZG,Improving,Working,5393368413,SIE298144,Computacenter France,,Europe North West,France
+TE-2511LS9SW,Neutral,Working,5393519151,SIE298524,Final Israel Ltd,,Europe South,Israel
+TE-2511NB4DF,Neutral,Working,07536879,,Booking.com B.V.,,Europe North West,Netherlands
+TE-2511PZ3QV,Improving,Monitoring,07500287,,Kanton Basel-Stadt,,Europe Central,Switzerland
+TE-2511QD9HN,Neutral,Working,5393679404,,H&M Hennes & Mauritz UK Limited,,UKIMEA,United Kingdom
+TE-2511QV7SJ,Neutral,Monitoring,5392883481,SIE297836,Banque Caledonienne d'Investissement,,UKIMEA,New Caledonia
+TE-2511TC8BQ,Improving,Monitoring,5393428657,SIE298466,Visa U.S.A. Inc. (Visa International),,North America,Colorado
+TE-2511WG8NJ,Improving,Monitoring,5392675038,SIE297160,Bundesamt für Informatik und Telekommunikation (BIT),,Europe Central,Switzerland
+TE-2511XF8LX,Improving,Working,5391365443,SIE294804,O2 (UK) Ltd (Telefonica O2 UK Ltd),,UKIMEA,United Kingdom
+TE-2511XZ5CV,Improving,Monitoring,5393330493,SIE298576,Almac Pharma Services Limited,,UKIMEA,United Kingdom
+TE-2511YD7KW,Neutral,Working,5393701630,SIE298720,Telia Company AB (prev: TeliaSonera AB),Yes,Europe North West,Sweden
+TE-2511YD8HG,Troubled,Working,07531194,,NTT Data Group Corporation,,Japan,Japan
+TE-2512BQ7DF,Improving,Working,5400132596,SIE299623,Global Switch Spain Holdings SL.,,Europe South,Spain
+TE-2512CD3NZ,Improving,Working,5393737899,SIE299924,Nokia Solutions and Networks Oy,,Europe North West,Finland
+TE-2512JN8WN,Neutral,Working,5393387450,SIE298638,Sopra Steria AS,,Europe North West,Norway
+TE-2512MH5BH,Improving,Working,5392615724,SIE298661,INSTITUTO DE BIOLOGIA EXPERIMENTAL E TECNOLÓGICA (IBET),,Europe South,Portugal
+TE-2512PR3MZ,Neutral,Working,5393315557,SIE297995,U. S. Strategic Programs Group,,North America,Utah
+TE-2512QH8CB,Neutral,Working,5392995626,,CMC Markets Holdings Ltd.,,UKIMEA,United Kingdom
+TE-2512RJ4FF,Improving,Working,5392595567,SIE299117,Societe Generale (SG),Yes,Europe North West,France
+TE-2512RX3SG,Improving,Monitoring,07593983,SIE299746,Wipro Technologies Limited,,UKIMEA,United Arab Emirates
+TE-2512TW4GF,Neutral,Working,5393268817,SIE299022,Airbus Operations,,Europe North West,France
+TE-2512WQ7SQ,Neutral,Working,5392475180,SIE296691,Bosch Robert GmbH,,Europe Central,Germany
+TE-2512XB2TL,Improving,Working,5390295961,SIE299875,Hoffmann La Roche France SA,,North America,California
+TE-2512YD9HZ,Improving,Working,5400118254,,MILANO SERRAVALLE MILANO TANGENZIALI SPA,,Europe South,Italy
+TE-2512YL8PG,Neutral,Working,5393895922,SIE299174,Groupama Supports et Services (G2S),,Europe North West,France
+TE-2512ZL2LG,Improving,Working,5392503627,SIE297330,Euro Information (EI),,Europe North West,France
+TE-2601BP2JV,Improving,Monitoring,5393707519,SIE298983,Roche Laboratories Inc.,,North America,California
+TE-2601BQ9CS,Improving,Working,5391058916,SIE294921,U. S. Strategic Programs Group,,North America,Utah
+TE-2601DS7GC,,Working,5400719975,SIE300442,Guangzhou Zen Semiconductor Corporation,,China,China
+TE-2601DW5ZW,Improving,Working,5400645131,SIE300335,"Meta Platforms, Inc. (Facebook)",,Latin America,Brazil
+TE-2601FB4SX,Improving,Working,5400576077,SIE300228,Wipro Limited,,UKIMEA,United Arab Emirates
+TE-2601FR4MM,Neutral,Working,5400261339,SIE300370,Ericsson AB,,Europe North West,Sweden
+TE-2601FX7VF,Improving,Working,5400012229,SIE299877,Ecole Polytechnique,,Europe Central,Switzerland
+TE-2601GF5TZ,Neutral,Working,5392054430,SIE296070,Ericsson Ltd,,Europe North West,Sweden
+TE-2601GF5XC,Improving,Working,5400674286,SIE300558,"Tomball Independent School District (TX, US)",,North America,Texas
+TE-2601GT9PL,Improving,Working,5393470552,SIE298578,AEB SE (prev: AEB GmbH),,Europe Central,Germany
+TE-2601JC5QD,Improving,Working,5400672453,,Santa Casa de Misericórdia de Belo Horizonte,,Latin America,Brazil
+TE-2601JC9WG,Neutral,Working,5393418601,SIE300098,Bank of America Corporation (BOA),Yes,North America,Arizona
+TE-2601JG8NT,Improving,Monitoring,5393874087,SIE299903,Lake Solutions AG,,Europe Central,Switzerland
+TE-2601JL2MH,Troubled,Working,5400670107,,"Volvo Trucks North America, Inc.",,North America,North Carolina
+TE-2601KD3PB,Neutral,Working,5392055469,,Eesti Energia AS,,Europe North West,Estonia
+TE-2601KW8JG,Improving,Working,5400426116,,"Ministry of Defence (MODA, Saudi Arabia)",,UKIMEA,Saudi Arabia
+TE-2601KX9SZ,Neutral,Working,5400026039,SIE299943,Microsoft AB,,Europe North West,Sweden
+TE-2601LC2CS,Neutral,Working,5393678475,,UK Atomic Energy Authority (UKAEA),,UKIMEA,United Kingdom
+TE-2601LD8SR,Improving,Monitoring,5400812040,,TRISERVE TECH/TRIPLE S,,Latin America,Puerto Rico
+TE-2601LR3NZ,Neutral,Working,5400776147,,Telia Company AB (prev: TeliaSonera AB),Yes,Europe North West,Sweden
+TE-2601NZ3XZ,Improving,Working,5400702977,SIE300638,Aruba SpA,,Europe South,Italy
+TE-2601PC7WJ,Neutral,Working,5393811690,SIE299636,MCAP Service Corporation,,North America,Ontario
+TE-2601PQ7SZ,Neutral,Working,5400152499,SIE300570,Groupama Holding Filiales et Participations,,Europe North West,France
+TE-2601PV5TQ,Improving,Working,5393721766,SIE299449,Nokia Solutions and Networks Oy,,Europe North West,Finland
+TE-2601PX4XN,Neutral,Working,5392267634,SIE296388,National Institute of Information and Communications Technology (NIICT),,Japan,Japan
+TE-2601QL8KV,Neutral,Working,5400191426,SIE299870,Internet Initiative Japan Inc. (IIJ),Yes,Japan,Japan
+TE-2601QX8VL,Neutral,Working,5393657642,SIE299762,Food Safety Authority of Ireland,,UKIMEA,Ireland
+TE-2601RQ6MW,Neutral,Working,5400507401,SIE300500,Direction Generale des Finances Publiques (DGFIP),,Europe North West,France
+TE-2601TD7RT,Improving,Working,5392206691,SIE296337,SK Hynix Semiconductor (Chongqing) Limited,,China,China
+TE-2601TK2XC,Improving,Working,5400300573,SIE300315 ,Digicel (PNG) Limited,,APAC,Australia
+TE-2601TM7MB,Improving,Working,5392907034,SIE298700,Facebook Malaysia Sdn. Bhd.,,APAC,Malaysia
+TE-2601TT5KK,Neutral,Working,5400132716,SIE299481,Sure (Guernsey) Limited,,UKIMEA,United Kingdom
+TE-2601TV7ZS,Neutral,Working,5400637604,,Industria de Diseño Textil SA (Inditex),,Europe South,Spain
+TE-2601TY8NP,Improving,Working,5400634714,,"Triara.com, S.A. de C.V.",,Latin America,Mexico
+TE-2601VR3LD,Improving,Working,5391847953,,Fortum Power and Heat Oy (Fortum Lämpö),,Europe North West,Finland
+TE-2601WF7PX,,Working,00288945,,Oceanfirst Bank,,North America,New Jersey
+TE-2601WF7XV,Improving,Working,5392568188,SIE299500,iLink Systems Limited,,Europe Central,Malta
+TE-2601WH9WZ,Improving,Working,5400533001,,DHL Information Services (Europe) s.r.o.,Yes,Europe Central,Czech Republic
+TE-2601WL9ZS,Improving,Working,5393549554,SIE298670,Euro Information (EI),,Europe North West,France
+TE-2601YF4BW,Improving,Working,5400446631,,"HP, Inc.",Yes,North America,Texas
+TE-2601YF5NK,Improving,Working,5400895208,SIE300754,Tesco PLC,Yes,UKIMEA,United Kingdom
+TE-2601YR6FQ,Neutral,Working,5390704327,SIE294873,"Advanced Micro Devices, Inc (AMD)",,North America,Texas
+TE-2601ZJ3FQ,Neutral,Working,5400385512,,Kompania Piwowarska S A,,Europe Central,Poland
+TE-2601ZT2YH,Neutral,Working,5400467482,SIE300632,MLB Limited (Sportingbet Ireland),,UKIMEA,Ireland
+TE-2601ZX7GB,Improving,Working,5400328656,,ALTEUS REMEDIES PRIVATE LIMITED,,India,India

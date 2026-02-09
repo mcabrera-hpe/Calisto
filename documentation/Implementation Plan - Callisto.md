@@ -33,31 +33,39 @@
   - Dynamic agent creation (2-5 agents)
   - Stop/restart conversation controls
   
+- **Phase 9 (Backend Split): FastAPI REST API** - 100% Complete
+  - FastAPI backend with 4 REST endpoints (create, get, start, delete conversations)
+  - In-memory conversation storage (POC-friendly, resets on restart)
+  - Server-Sent Events (SSE) streaming for real-time conversation updates
+  - Streamlit frontend refactored to call API instead of direct agent imports
+  - Docker service separation (api:8000, app:8501)
+  - CORS middleware for frontend/backend communication
+  - Full end-to-end testing with curl validation
+
 ### 🚧 In Progress
 - **Phase 3 (Days 7-9):** LLM-Powered Scenario Generation - Mock only
 - **Phase 4 (Days 10-12):** RAG Pipeline - Not started
 
 ### 📋 Next Steps (Priority Order)
-1. **FastAPI Backend Split** - Minimal API wrapper for cloud deployment readiness (~1 day)
-2. **LLM-powered agent suggestion** - Replace mock suggest_agents_llm() with real LLM call
-3. **RAG Pipeline** - Document ingestion, LlamaIndex integration, multi-tenant retrieval
-4. **Conversation persistence** - Save to Weaviate and JSON exports
-5. **Sentiment analysis** - Real-time scoring with transformers
-6. **Human-in-loop** - Connect HumanAgent to Streamlit chat_input
+1. **LLM-powered agent suggestion** - Replace mock suggest_agents_llm() with real LLM call
+2. **RAG Pipeline** - Document ingestion, LlamaIndex integration, multi-tenant retrieval
+3. **Conversation persistence** - Save to Weaviate and JSON exports
+4. **Sentiment analysis** - Real-time scoring with transformers
+5. **Human-in-loop** - Connect HumanAgent to Streamlit chat_input
 
-### 📊 Overall Progress: ~40% Complete
+### 📊 Overall Progress: ~50% Complete
 - Infrastructure: 100% ✅
+- Backend API: 100% ✅ (FastAPI REST API with SSE streaming)
 - Core Agent System: 90% ✅ (missing: LLM agent generation)
-- UI Framework: 70% ✅ (missing: sentiment chart, human input)
-- Backend API: 0% (Phase 9 planned)
+- UI Framework: 80% ✅ (API-connected, missing: sentiment chart, human input)
 - RAG Pipeline: 0%
 - Persistence: 0%
 - Documentation: 100% ✅
 
-### 🎯 Next Milestone: Phase 9 - FastAPI Backend Split
-**Goal:** Cloud-ready API architecture  
-**Timeline:** 1 day  
-**Complexity:** Minimal (~100 new lines, POC-compliant)
+### 🎯 Next Milestone: Phase 3 - LLM Agent Suggestion
+**Goal:** Replace mock agent suggestions with real LLM calls  
+**Timeline:** 0.5 days  
+**Complexity:** Low (~50 lines)
 
 ---
 

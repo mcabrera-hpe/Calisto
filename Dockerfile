@@ -25,12 +25,8 @@ COPY src/ ./src/
 COPY scripts/ ./scripts/
 COPY .streamlit/ ./.streamlit/
 
-# Expose Streamlit port
-EXPOSE 8501
+# Expose ports (overridden per service in docker-compose)
+EXPOSE 8501 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8501/_stcore/health || exit 1
-
-# Default command
-CMD ["streamlit", "run", "src/app.py", "--server.address", "0.0.0.0"]
+# Default command (overridden in docker-compose per service)
+CMD ["streamlit", "run", "src/ui/main.py", "--server.address", "0.0.0.0"]

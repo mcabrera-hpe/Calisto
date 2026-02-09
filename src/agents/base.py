@@ -6,15 +6,10 @@ Simple AI agents that respond using Ollama LLM.
 
 import logging
 import requests
-import sys
-import os
 from typing import List, Dict, Optional
 from datetime import datetime
 
-# Add src to path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from utils.config import OLLAMA_URL, DEFAULT_MODEL
+from src.utils.config import OLLAMA_URL, DEFAULT_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -114,16 +109,16 @@ Guidelines:
                     "think": False,
                     "options": {
                         "temperature": 0.7,
-                        "num_predict": 200
+                        "num_predict": 75  # Reduced for faster CPU execution
                     }
                 },
-                timeout=300  # 5 minutes for CPU-only execution
+                timeout=420  # 7 minutes for CPU-only execution
             )
             response.raise_for_status()
             return response.json()
             
         except requests.exceptions.Timeout:
-            logger.error(f"{self.name}: Request timed out after 300s")
+            logger.error(f"{self.name}: Request timed out after 420s")
             raise RuntimeError(f"Agent {self.name} timed out waiting for LLM response")
         except requests.exceptions.RequestException as e:
             logger.error(f"{self.name}: HTTP error: {e}")

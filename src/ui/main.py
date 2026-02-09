@@ -118,32 +118,31 @@ with col2:
         
         try:
             # Create conversation via API
-            with status_placeholder:
-                with st.spinner("🔧 Creating conversation..."):
-                    response = requests.post(
-                        f"{API_URL}/conversations",
-                        json={
-                            "scenario": scenario,
-                            "client": client,
-                            "num_agents": num_agents,
-                            "max_turns": max_turns
-                        },
-                        timeout=10
-                    )
-                    response.raise_for_status()
-                    conv_id = response.json()["conversation_id"]
-                    st.session_state.conversation_id = conv_id
+            response = requests.post(
+                f"{API_URL}/conversations",
+                json={
+                    "scenario": scenario,
+                    "client": client,
+                    "num_agents": num_agents,
+                    "max_turns": max_turns
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            conv_id = response.json()["conversation_id"]
+            st.session_state.conversation_id = conv_id
             
             logger.info(f"Created conversation {conv_id}")
-            status_placeholder.success(f"✅ Conversation created: {conv_id[:8]}...")
             
             # Start streaming conversation
-            with status_placeholder:
-                with st.spinner(f"🚀 Starting {num_agents} agents (max {max_turns} turns)..."):
-                    stream_response = requests.post(
-                        f"{API_URL}/conversations/{conv_id}/start",
-                        stream=True,
-            turn_count = 0
+            stream_response = requests.post(
+                f"{API_URL}/conversations/{conv_id}/start",
+                stream=True,
+                timeout=600  # 10 min timeout
+            )
+            stream_response.raise_for_status()
+            
+            # Process SSE stream
             for line in stream_response.iter_lines():
                 if line:
                     line_str = line.decode('utf-8')
@@ -152,21 +151,13 @@ with col2:
                         
                         # Check for error
                         if 'error' in message:
-                            status_placeholder.error(f"❌ Error: {message['error']}")
+                            st.error(f"Error: {message['error']}")
                             break
                         
                         st.session_state.conversation.append(message)
-                        turn_count += 1
                         
                         # Display all messages so far
                         with message_placeholder.container():
-                            display_conversation(st.session_state.conversation)
-                        
-                        # Show detailed status with agent name and timing
-                        agent_name = message.get('agent', 'Agent')
-                        gen_time = message.get('generation_time', 0)
-                        with status_placeholder:
-                            with st.spinner(f"💭 Turn {turn_count}/{max_turns} | {agent_name} responded in {gen_time:.1f}s | Next agent thinking... (⚠️ CPU-only: ~1-3 min per response)
                             display_conversation(st.session_state.conversation)
                         
                         # Show status
