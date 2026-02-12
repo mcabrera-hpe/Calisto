@@ -17,7 +17,7 @@ from weaviate.classes.config import Configure, Property, DataType
 
 sys.path.insert(0, '/app/src')
 
-from utils.config import WEAVIATE_URL, OLLAMA_URL
+from utils.config import WEAVIATE_URL
 from utils.logging_config import setup_logging
 
 # Configure logging
@@ -76,18 +76,12 @@ def create_document_collection(client: weaviate.WeaviateClient) -> None:
         
         logger.info(f"Creating collection: {collection_name}")
         
-        # Create collection with Ollama vectorizer and multi-tenancy
+        # Create collection without vectorizer (external LLM API doesn't provide embeddings)
+        # Note: For RAG to work, you'll need to separately configure an embedding service
         client.collections.create(
             name=collection_name,
             
-            # Vector configuration with Ollama embeddings
-            vector_config=Configure.Vectors.text2vec_ollama(
-                api_endpoint=OLLAMA_URL,
-                model="nomic-embed-text",
-                vectorize_collection_name=False
-            ),
-            
-            # Enable multi-tenancy for per-company isolation
+            # Multi-tenancy for per-company isolation
             multi_tenancy_config=Configure.multi_tenancy(enabled=True),
             
             # Properties (fields)

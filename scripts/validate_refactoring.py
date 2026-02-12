@@ -6,9 +6,7 @@ Run: docker-compose exec app python scripts/validate_refactoring.py
 """
 
 import sys
-import os
-
-sys.path.insert(0, '/app/src')
+import traceback
 
 def main() -> None:
     """Run validation tests for the refactored code."""
@@ -22,6 +20,10 @@ def main() -> None:
         print("✅ Test 1: Backwards compatibility imports work")
     except Exception as e:
         print(f"❌ Test 1 FAILED: {e}")
+        print("\nFull traceback:", flush=True)
+        for line in traceback.format_exc().splitlines():
+            print(line, flush=True)
+        sys.stdout.flush()
         return
     
     # Test 2: Import from new files directly
@@ -60,7 +62,7 @@ def main() -> None:
     # Test 5: Verify agent has new helper methods
     try:
         assert hasattr(agent, "_build_messages"), "Agent should have _build_messages method"
-        assert hasattr(agent, "_call_ollama"), "Agent should have _call_ollama method"
+        assert hasattr(agent, "_call_llm_api"), "Agent should have _call_llm_api method"
         assert hasattr(agent, "_build_system_prompt"), "Agent should have _build_system_prompt method"
         print("✅ Test 5: Agent has extracted helper methods")
     except AssertionError as e:

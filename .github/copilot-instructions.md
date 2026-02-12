@@ -1,7 +1,7 @@
 # Callisto Project Guidelines
 
 ## Overview
-Callisto is a **Dockerized multi-agent conversation simulator** for B2B PoC development. Agents use local Ollama LLMs to simulate business negotiations (e.g., HPE sales vs Toyota procurement). Architecture: 3 containers (app, ollama, weaviate) with Streamlit UI.
+Callisto is a **Dockerized multi-agent conversation simulator** for B2B PoC development. Agents use external LLM API to simulate business negotiations (e.g., HPE sales vs Toyota procurement). Architecture: 3 containers (app, api, weaviate) with Streamlit UI, calling external LLM API over network.
 
 **Development Philosophy**: This is a POC with incremental development. Simplicity and minimal code win over completeness. Features are intentionally incomplete - implement what's needed, when it's needed. Clever, concise solutions preferred over robust, production-ready code.
 
@@ -39,9 +39,9 @@ def respond(self, conversation_history: List[Dict]) -> tuple[str, float]:
 
 ### Container Structure
 - **app**: Streamlit UI (Python 3.11, Poetry) - Frontend client
-- **api**: FastAPI REST API (Python 3.11, Poetry) - Backend service
-- **ollama**: LLM inference (mistral/llama3.1 models)
+- **api**: FastAPI REST API (Python 3.11, Poetry) - Backend service  
 - **weaviate**: Multi-tenant vector database for RAG
+- **External LLM API**: Remote inference server (meta/llama-3.1-8b-instruct)
 
 See [docker-compose.yml](docker-compose.yml) for service definitions and networking.
 
@@ -57,7 +57,7 @@ See [docker-compose.yml](docker-compose.yml) for service definitions and network
 3. API creates agents and orchestrator
 4. UI starts streaming via POST to `/conversations/{id}/start`
 5. API streams conversation via Server-Sent Events (SSE)
-6. Each agent calls Ollama `/api/chat` endpoint
+7. Each agent calls external LLM API `/v1/chat/completions` endpoint (OpenAI-compatible)
 7. Responses streamed back to UI in real-time
 8. Conversation stored in API memory (resets on restart)
 
@@ -65,16 +65,18 @@ See [docker-compose.yml](docker-compose.yml) for service definitions and network
 
 ### Environment Variables
 All configuration via env vars - **never hardcode URLs or models**:
-- `OLLAMA_URL`: Default `http://ollama:11434` (used by API service)
-- `WEAVIATE_URL`: Default `http://weaviate:8080` (used by API service)
-- `DEFAULT_MODEL`: LLM model name (e.g., `mistral`, `llama3.1`)
+- `LLM_API_ENDPOINT`: External LLM API URL (OpenAI-compatible)
+- `LLM_API_TOKEN`: Bearer token for API authentication (set in `.env` file)
+- `WEAVIATE_URL`: Default `http://weaviate:8080` or `http://localhost:8080` with host networking
+- `DEFAULT_MODEL`: LLM model name (e.g., `meta/llama-3.1-8b-instruct`)
 - `MAX_TURNS`: Conversation limit (default `30`)
 - `API_URL`: Frontend calls backend at `http://api:8000` (Docker service name)
 
-See pattern in [src/agents/base.py](src/agents/base.py):
+See pattern in [src/utils/config.py](src/utils/config.py):
 ```python
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL")
+LLM_API_ENDPOINT = os.getenv("LLM_API_ENDPOINT", "https://...")
+LLM_API_TOKEN = os.getenv("LLM_API_TOKEN", "")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "meta/llama-3.1-8b-instruct")
 ```
 
 Frontend API connection in [src/app.py](src/app.py):
@@ -84,7 +86,10 @@ API_URL = "http://api:8000"  # Docker service name
 
 ## Build and Test
 
-### Development WorkfloFrontend logs only
+### Development Workflow
+```bash
+# View logs
+make logs app        # Frontend logs only
 make logs api        # Backend logs only
 make logs            # All services
 
@@ -108,26 +113,16 @@ curl -X POST http://localhost:8000/conversations \
   -d '{"scenario":"Test","client":"Toyota","num_agents":2,"max_turns":2}'
 
 # Test API from inside container
-docker-compose exec api python scripts/test_api.py
+docker-compose exec api python scripts/test_api_quick.py
 
-# Test agents
-docker-compose exec apiRemove volumes too
-```
-
-### Testing
-```bash
-# Run test scripts inside container
-docker-compose exec app python scripts/test_agents.py
-
-# Validate code refactoring
-docker exec callisto-app python scripts/validate_refactoring.py
-
+# Note: Full agent tests require network access to external LLM API
+# These may not work from inside containers due to VPN/firewall restrictions
 # Initialize Weaviate (first run only)
 docker-compose exec app python scripts/init_weaviate.py
 ```
 
 ### First-Time Setup
-See [README.md](../README.md#quick-start) for complete setup instructions with model downloads and initialization
+See [README.md](../README.md#quick-start) for complete setup instructions
 
 ## Project Conventions
 
@@ -136,9 +131,10 @@ Agents **always return `(message: str, generation_time: float)` tuple**. See [sr
 
 ### Error Handling
 - **Keep it simple**: Log error, raise exception with clear message
-- **Timeouts**: 300s for Ollama calls (CPU-only execution)
+- **Timeouts**: 60s for external API calls (network-based)
 - **Let it fail fast**: Don't over-engineer error recovery for POC
 - **Trust the logs**: If something breaks, logs will tell you why
+- **SSL verification**: Disabled for internal network APIs (`verify=False`)
 
 Example from [src/agents/core.py:100-127](src/agents/core.py#L100-L127):
 ```python
@@ -181,7 +177,22 @@ Both methods in [MultiAgentOrchestrator](src/agents/core.py).
   ```json
   {
     "model": "mistral",
+    External LLM API
+- **Endpoint**: `/v1/chat/completions` (OpenAI-compatible)
+- **Method**: POST with Bearer token authentication
+- **Headers**: `Authorization: Bearer {LLM_API_TOKEN}`, `Content-Type: application/json`
+- **Payload**: 
+  ```json
+  {
+    "model": "meta/llama-3.1-8b-instruct",
     "messages": [{"role": "system", "content": "..."}, ...],
+    "max_tokens": 150,
+    "temperature": 0.7
+  }
+  ```
+- **Response**: `{"choices": [{"message": {"content": "..."}}]}`
+
+See [src/agents/base.py:100-130](src/agents/base.py#L100-L130) for implementation.: [{"role": "system", "content": "..."}, ...],
     "stream": false,
     "options": {"temperature": 0.7, "num_predict": 200}
   }Test the Full Stack
@@ -227,11 +238,8 @@ See [src/agents/core.py:84-98](src/agents/core.py#L84-L98) for implementation.
 
 ### Change LLM Model
 ```bash
-# Download new model
-docker-compose exec ollama ollama pull llama3.1
-
 # Update environment variable in docker-compose.yml
-DEFAULT_MODEL: llama3.1
+DEFAULT_MODEL: meta/llama-3.2-8b-instruct  # Or any model available on your API
 
 # Restart
 make restart

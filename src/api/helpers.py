@@ -2,8 +2,8 @@
 Helper functions for Callisto API.
 """
 
-from src.agents import Agent
-from src.utils.config import DEFAULT_MODEL
+from agents import Agent
+from utils.config import DEFAULT_MODEL
 
 
 def create_agent(index: int, client: str) -> Agent:

@@ -1,4 +1,4 @@
-.PHONY: up down restart logs logs-app logs-api logs-ollama logs-weaviate build clean help
+.PHONY: up down restart logs logs-app logs-api logs-weaviate build clean help
 
 help:
 	@echo "Callisto - Docker Commands"
@@ -9,7 +9,6 @@ help:
 	@echo "  make logs        - Show all logs (live)"
 	@echo "  make logs-app    - Show app logs (live)"
 	@echo "  make logs-api    - Show API logs (live)"
-	@echo "  make logs-ollama - Show Ollama logs (live)"
 	@echo "  make build       - Rebuild containers"
 	@echo "  make clean       - Stop and remove all containers/volumes"
 	@echo ""
@@ -31,9 +30,6 @@ logs-app:
 
 logs-api:
 	docker-compose logs -f api
-
-logs-ollama:
-	docker-compose logs -f ollama
 
 logs-weaviate:
 	docker-compose logs -f weaviate

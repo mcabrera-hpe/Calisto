@@ -14,10 +14,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.agents import MultiAgentOrchestrator
-from src.api.models import ConversationRequest, ConversationResponse
-from src.api.helpers import create_agent
-from src.utils.logging_config import setup_logging
+from agents import MultiAgentOrchestrator
+from api.models import ConversationRequest, ConversationResponse
+from api.helpers import create_agent
+from utils.logging_config import setup_logging
 
 # Configure logging
 setup_logging()

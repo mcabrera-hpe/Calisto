@@ -8,21 +8,9 @@ services:
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'text2vec-ollama'
-      ENABLE_MODULES: 'text2vec-ollama'
       CLUSTER_HOSTNAME: 'node1'
     volumes:
       - weaviate_data:/var/lib/weaviate
-    networks:
-      - callisto-network
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: callisto-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_models:/root/.ollama
     networks:
       - callisto-network
 
@@ -36,18 +24,18 @@ services:
     environment:
       - PYTHONPATH=/app/src
       - WEAVIATE_URL=http://weaviate:8080
-      - OLLAMA_URL=http://ollama:11434
-      - DEFAULT_MODEL=mistral
+      - LLM_API_ENDPOINT=http://host.docker.internal:9001/v1/chat/completions
+      - LLM_API_TOKEN=${LLM_API_TOKEN}
+      - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
       - MAX_TURNS=30
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts
       - ./data:/app/data
-    depends_on:
-      - weaviate
-      - ollama
     networks:
       - callisto-network
+    depends_on:
+      - weaviate
     command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   app:
@@ -60,18 +48,21 @@ services:
     environment:
       - PYTHONPATH=/app/src
       - WEAVIATE_URL=http://weaviate:8080
-      - OLLAMA_URL=http://ollama:11434
-      - DEFAULT_MODEL=mistral
+      - LLM_API_ENDPOINT=http://host.docker.internal:9001/v1/chat/completions
+      - LLM_API_TOKEN=${LLM_API_TOKEN}
+      - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
       - MAX_TURNS=30
+      - API_URL=http://api:8000
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts
       - ./data:/app/data
       - ./documentation:/app/documentation
       - ./.streamlit:/app/.streamlit
+    networks:
+      - callisto-network
     depends_on:
       - weaviate
-      - ollama
       - api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
@@ -79,13 +70,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - callisto-network
     command: ["streamlit", "run", "src/ui/main.py", "--server.address", "0.0.0.0"]
 
 volumes:
   weaviate_data:
-  ollama_models:
 
 networks:
   callisto-network:

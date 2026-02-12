@@ -1,19 +1,20 @@
 # Callisto - Multi-Agent Conversation Simulator
 
-Dockerized multi-agent conversation simulator for B2B PoC development. Agents use local Ollama LLMs to simulate business negotiations. Runs 100% locally.
+Dockerized multi-agent conversation simulator for B2B PoC development. Agents use external LLM API to simulate business negotiations.
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** Docker 20.10+, Docker Compose 2.0+, 16GB RAM
+**Prerequisites:** Docker 20.10+, Docker Compose 2.0+, 8GB RAM, Access to external LLM API
 
 ```bash
+# Set your API token
+export LLM_API_TOKEN="your-token-here"
+# Or edit .env file
+
 # Start services
 docker-compose up -d
-
-# Download LLM model (first time only)
-docker-compose exec ollama ollama pull mistral
 
 # Initialize Weaviate
 docker-compose exec app python scripts/init_weaviate.py
@@ -27,10 +28,11 @@ open http://localhost:8000/docs  # API docs (Swagger)
 
 ## Architecture
 
-**4 containers:** `app` (Streamlit UI), `api` (FastAPI backend), `ollama` (LLM inference), `weaviate` (vector DB)
+**3 containers:** `app` (Streamlit UI), `api` (FastAPI backend), `weaviate` (vector DB)  
+**External:** LLM API (remote inference server)
 
 ```
-UI (Streamlit :8501) ──HTTP──▶ API (FastAPI :8000) ──imports──▶ Agents ──HTTP──▶ Ollama (:11434)
+UI (Streamlit :8501) ──HTTP──▶ API (FastAPI :8000) ──imports──▶ Agents ──HTTPS──▶ External LLM API
 ```
 
 ### Project Structure
@@ -90,21 +92,21 @@ Code changes in `src/` auto-reload via volume mounts.
 
 ### Configuration
 
-Set in `docker-compose.yml`:
+Set in `docker-compose.yml` or `.env` file:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OLLAMA_URL` | `http://ollama:11434` | LLM server |
-| `WEAVIATE_URL` | `http://weaviate:8080` | Vector DB |
-| `DEFAULT_MODEL` | `mistral` | LLM model |
+| `LLM_API_ENDPOINT` | *[see .env]* | External LLM API URL |
+| `LLM_API_TOKEN` | *[required]* | API authentication token |
+| `WEAVIATE_URL` | `http://weaviate:8080` (container) / `http://localhost:8080` (host) | Vector DB |
+| `DEFAULT_MODEL` | `meta/llama-3.1-8b-instruct` | LLM model identifier |
 | `MAX_TURNS` | `30` | Conversation turn limit |
-| `API_URL` | `http://api:8000` | Backend URL (used by frontend) |
 
 ### Change LLM Model
 
+Update `DEFAULT_MODEL` in `docker-compose.yml` to match a model available on your external LLM API, then:
+
 ```bash
-docker-compose exec ollama ollama pull llama3.1
-# Update DEFAULT_MODEL in docker-compose.yml, then:
 make restart
 ```
 
@@ -125,13 +127,19 @@ The Streamlit UI also shows detailed progress: "Turn 1/5 | Sarah responded in 87
 ## Troubleshooting
 
 ```bash
-docker-compose ps                    # Check service status
-docker-compose logs -f api           # API logs
-docker-compose logs -f ollama        # LLM logs
-docker-compose exec ollama ollama list  # Verify models downloaded
+docker-compose ps                # Check service status
+docker-compose logs -f api       # API logs
+docker-compose logs -f app       # Frontend logs
 ```
 
-**Out of memory?** Docker Desktop → Settings → Resources → Memory (set to 12GB+)
+**Network Issues?**  
+If containers can't reach the external LLM API (common with corporate VPNs), use host networking mode (already configured in `docker-compose.yml`).
+
+**API Token Expired?**  
+Update `LLM_API_TOKEN` in `.env` file and restart: `docker-compose restart`
+
+**Out of memory?**  
+Docker Desktop → Settings → Resources → Memory (set to 8GB+)
 
 ---
 

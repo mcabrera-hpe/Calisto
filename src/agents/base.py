@@ -1,22 +1,26 @@
 """
 Agent base classes.
 
-Simple AI agents that respond using Ollama LLM.
+Simple AI agents that respond using external LLM API.
 """
 
 import logging
 import requests
+import urllib3
 from typing import List, Dict, Optional
 from datetime import datetime
 
-from src.utils.config import OLLAMA_URL, DEFAULT_MODEL
+from utils.config import LLM_API_ENDPOINT, LLM_API_TOKEN, DEFAULT_MODEL
+
+# Suppress SSL warnings for internal network API
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
     """
-    Simple AI agent that responds using Ollama LLM.
+    Simple AI agent that responds using external LLM API.
     
     No RAG, no complex tools - just basic conversation.
     """
@@ -62,7 +66,7 @@ Guidelines:
 - Respond naturally as if in a business conversation"""
 
     def _build_messages(self, conversation_history: List[Dict]) -> List[Dict]:
-        """Build messages array for Ollama API.
+        """Build messages array for OpenAI-compatible API.
         
         Args:
             conversation_history: List of messages with 'agent' and 'message' keys
@@ -85,40 +89,43 @@ Guidelines:
         
         return messages
     
-    def _call_ollama(self, messages: List[Dict]) -> Dict:
-        """Make HTTP call to Ollama API.
+    def _call_llm_api(self, messages: List[Dict]) -> Dict:
+        """Make HTTP call to external LLM API.
         
         Args:
             messages: Messages array for LLM
             
         Returns:
-            Response JSON from Ollama
+            Response JSON from API
             
         Raises:
             RuntimeError: If request fails or times out
         """
         logger.info(f"{self.name} generating response...")
         
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {LLM_API_TOKEN}"
+        }
+        
         try:
             response = requests.post(
-                f"{OLLAMA_URL}/api/chat",
+                LLM_API_ENDPOINT,
+                headers=headers,
                 json={
                     "model": self.model,
                     "messages": messages,
-                    "stream": False,
-                    "think": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 75  # Reduced for faster CPU execution
-                    }
+                    "max_tokens": 150,
+                    "temperature": 0.7
                 },
-                timeout=420  # 7 minutes for CPU-only execution
+                timeout=60,  # 1 minute for network API
+                verify=False  # Skip SSL verification for internal network
             )
             response.raise_for_status()
             return response.json()
             
         except requests.exceptions.Timeout:
-            logger.error(f"{self.name}: Request timed out after 420s")
+            logger.error(f"{self.name}: Request timed out after 60s")
             raise RuntimeError(f"Agent {self.name} timed out waiting for LLM response")
         except requests.exceptions.RequestException as e:
             logger.error(f"{self.name}: HTTP error: {e}")
@@ -138,11 +145,11 @@ Guidelines:
         
         # Build and send request
         messages = self._build_messages(conversation_history)
-        result = self._call_ollama(messages)
+        result = self._call_llm_api(messages)
         
-        # Parse response
+        # Parse response (OpenAI-compatible format)
         try:
-            message = result['message']['content'].strip()
+            message = result['choices'][0]['message']['content'].strip()
             
             if not message:
                 logger.error(f"{self.name}: Received empty response")
