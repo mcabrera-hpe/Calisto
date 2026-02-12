@@ -2,6 +2,9 @@
 
 Dockerized multi-agent conversation simulator for B2B PoC development. Agents use external LLM API to simulate business negotiations.
 
+**Goals:** Standardize agent infrastructure, reduce PoC time from days to hours, enable rapid model comparison  
+**Status:** 40% complete — Core agent system working, RAG/persistence pending
+
 ---
 
 ## Quick Start
@@ -23,7 +26,26 @@ open http://localhost:8501   # Streamlit UI
 open http://localhost:8000/docs  # API docs (Swagger)
 
 # Stop everything
-make down
+### VPN Proxy (if containers can't reach LLM API)
+
+**Problem:** Corporate VPN routing doesn't work inside Docker containers  
+**Solution:** Proxy server on host (port 7000) forwards requests through VPN
+
+```bash
+# Automatic (recommended)
+make up                           # Starts proxy + containers
+
+# Manual
+./start-proxy.sh                  # In separate terminal
+curl http://localhost:7000/health # Verify: {"status": "ok"}
+docker-compose up -d              # Start containers
+```
+
+Containers use `LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions`
+
+**Troubleshooting:**
+- Port conflict? `lsof -i :7000` to check if port is in use
+- Still failing? Verify VPN is connected, check DNS in /etc/hosts
 ```
 
 **Note:** If you're on a corporate VPN, the proxy server automatically routes container requests to the external LLM API. See [VPN_PROXY_SETUP.md](VPN_PROXY_SETUP.md) for details.
@@ -128,10 +150,22 @@ The Streamlit UI also shows detailed progress: "Turn 1/5 | Sarah responded in 87
 
 ---
 
-## Troubleshooting
+## Project Status
 
-```bash
-docker-compose ps                # Check service status
+**Completed:**
+- ✅ Docker infrastructure (3 services + proxy)
+- ✅ FastAPI backend with SSE streaming
+- ✅ Agent core (external LLM API integration)
+- ✅ Streamlit UI for conversations
+- ✅ Code quality: 92.5/100
+
+**Next Steps:**
+- LLM-powered agent generation (currently hardcoded)
+- RAG pipeline with LlamaIndex
+- Conversation persistence (Weaviate + JSON)
+- Sentiment analysis integration
+
+See [Implementation Plan](documentation/Implementation%20Plan%20-%20Callisto.md) for detailed roadmap
 docker-compose logs -f api       # API logs
 docker-compose logs -f app       # Frontend logs
 ```
