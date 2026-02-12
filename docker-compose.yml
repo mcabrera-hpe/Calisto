@@ -23,8 +23,9 @@ services:
       - "8000:8000"
     environment:
       - PYTHONPATH=/app/src
+      - PYTHONUNBUFFERED=1
       - WEAVIATE_URL=http://weaviate:8080
-      - LLM_API_ENDPOINT=http://host.docker.internal:9001/v1/chat/completions
+      - LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions
       - LLM_API_TOKEN=${LLM_API_TOKEN}
       - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
       - MAX_TURNS=30
@@ -47,8 +48,9 @@ services:
       - "8501:8501"
     environment:
       - PYTHONPATH=/app/src
+      - PYTHONUNBUFFERED=1
       - WEAVIATE_URL=http://weaviate:8080
-      - LLM_API_ENDPOINT=http://host.docker.internal:9001/v1/chat/completions
+      - LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions
       - LLM_API_TOKEN=${LLM_API_TOKEN}
       - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
       - MAX_TURNS=30
@@ -70,7 +72,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    command: ["streamlit", "run", "src/ui/main.py", "--server.address", "0.0.0.0"]
+    command: ["python", "-u", "-m", "streamlit", "run", "src/ui/main.py", "--logger.level=debug"]
 
 volumes:
   weaviate_data:

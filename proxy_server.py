@@ -9,7 +9,7 @@ Usage:
     python proxy_server.py
 
 Then update docker-compose.yml to use:
-    LLM_API_ENDPOINT=http://host.docker.internal:9000/v1/chat/completions
+    LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions
 """
 
 from flask import Flask, request, Response
@@ -79,12 +79,12 @@ if __name__ == '__main__':
     print("LLM API Proxy Server")
     print("=" * 60)
     print(f"Forwarding to: {API_URL}")
-    print(f"Listening on: http://0.0.0.0:9001")
+    print(f"Listening on: http://0.0.0.0:7000")
     print(f"Token configured: {'Yes' if TOKEN else 'No'}")
     print()
     print("Docker containers should use:")
-    print("  LLM_API_ENDPOINT=http://host.docker.internal:9001/v1/chat/completions")
+    print("  LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions")
     print("=" * 60)
     print()
     
-    app.run(host='0.0.0.0', port=9001, debug=False)
+    app.run(host='0.0.0.0', port=7000, debug=False)

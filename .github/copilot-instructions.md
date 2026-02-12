@@ -57,20 +57,25 @@ See [docker-compose.yml](docker-compose.yml) for service definitions and network
 3. API creates agents and orchestrator
 4. UI starts streaming via POST to `/conversations/{id}/start`
 5. API streams conversation via Server-Sent Events (SSE)
-7. Each agent calls external LLM API `/v1/chat/completions` endpoint (OpenAI-compatible)
-7. Responses streamed back to UI in real-time
-8. Conversation stored in API memory (resets on restart)
+6. Each agent calls proxy server at `http://host.docker.internal:7000/v1/chat/completions`
+7. Proxy forwards to external LLM API (handles VPN routing on host)
+8. Responses streamed back to UI in real-time
+9. Conversation stored in API memory (resets on restart)
+
+**Note:** The proxy server ([proxy_server.py](proxy_server.py)) runs on the host machine (not in Docker) to handle VPN routing. Docker containers connect via `host.docker.internal:7000`.
 
 ## Configuration
 
 ### Environment Variables
 All configuration via env vars - **never hardcode URLs or models**:
-- `LLM_API_ENDPOINT`: External LLM API URL (OpenAI-compatible)
+- `LLM_API_ENDPOINT`: Default `http://host.docker.internal:7000/v1/chat/completions` (proxy on port 7000)
 - `LLM_API_TOKEN`: Bearer token for API authentication (set in `.env` file)
 - `WEAVIATE_URL`: Default `http://weaviate:8080` or `http://localhost:8080` with host networking
 - `DEFAULT_MODEL`: LLM model name (e.g., `meta/llama-3.1-8b-instruct`)
 - `MAX_TURNS`: Conversation limit (default `30`)
 - `API_URL`: Frontend calls backend at `http://api:8000` (Docker service name)
+
+**Proxy Server:** Runs on host machine at port 7000, forwards requests to external LLM API. Required for VPN environments. See [VPN_PROXY_SETUP.md](VPN_PROXY_SETUP.md).
 
 See pattern in [src/utils/config.py](src/utils/config.py):
 ```python
@@ -88,9 +93,12 @@ API_URL = "http://api:8000"  # Docker service name
 
 ### Development Workflow
 ```bash
+# Start everything (proxy + Docker containers)
+make up
+
 # View logs
-make logs app        # Frontend logs only
-make logs api        # Backend logs only
+make logs-app        # Frontend logs only
+make logs-api        # Backend logs only
 make logs            # All services
 
 # Restart after code changes (volumes auto-sync)
@@ -99,13 +107,22 @@ make restart
 # Full rebuild
 make build
 
-# Stop and clean
-make down            # Stop containers
+# Stop everything (proxy + containers)
+make down
+
+# Stop and clean volumes
 make clean           # Remove volumes too
+
+# Proxy-only commands
+make proxy-up        # Start proxy only
+make proxy-down      # Stop proxy only
 ```
 
 ### Testing
 ```bash
+# Test proxy is running
+curl http://localhost:7000/health
+
 # Test API endpoints directly
 curl http://localhost:8000/
 curl -X POST http://localhost:8000/conversations \
@@ -115,8 +132,9 @@ curl -X POST http://localhost:8000/conversations \
 # Test API from inside container
 docker-compose exec api python scripts/test_api_quick.py
 
-# Note: Full agent tests require network access to external LLM API
-# These may not work from inside containers due to VPN/firewall restrictions
+# Run full test suite (requires proxy running)
+./run_tests.sh
+
 # Initialize Weaviate (first run only)
 docker-compose exec app python scripts/init_weaviate.py
 ```

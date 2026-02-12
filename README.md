@@ -6,23 +6,27 @@ Dockerized multi-agent conversation simulator for B2B PoC development. Agents us
 
 ## Quick Start
 
-**Prerequisites:** Docker 20.10+, Docker Compose 2.0+, 8GB RAM, Access to external LLM API
+**Prerequisites:** Docker 20.10+, Docker Compose 2.0+, 8GB RAM, Python 3.11+, Poetry, Access to external LLM API
 
 ```bash
-# Set your API token
-export LLM_API_TOKEN="your-token-here"
-# Or edit .env file
+# Set your API token in .env file
+# LLM_API_TOKEN="your-token-here"
 
-# Start services
-docker-compose up -d
+# Start proxy server + all Docker services
+make up
 
-# Initialize Weaviate
+# Initialize Weaviate (first time only)
 docker-compose exec app python scripts/init_weaviate.py
 
 # Access
 open http://localhost:8501   # Streamlit UI
 open http://localhost:8000/docs  # API docs (Swagger)
+
+# Stop everything
+make down
 ```
+
+**Note:** If you're on a corporate VPN, the proxy server automatically routes container requests to the external LLM API. See [VPN_PROXY_SETUP.md](VPN_PROXY_SETUP.md) for details.
 
 ---
 

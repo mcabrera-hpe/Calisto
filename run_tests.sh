@@ -26,10 +26,10 @@ echo "✅ Docker containers are running"
 echo ""
 
 # Check proxy is running
-if ! curl -s http://localhost:9001/health &> /dev/null; then
-    echo "⚠️  WARNING: Proxy server not running on port 9001"
+if ! curl -s http://localhost:7000/health &> /dev/null; then
+    echo "⚠️  WARNING: Proxy server not running on port 7000"
     echo "   Some tests may fail without the proxy."
-    echo "   Start it with: python3 proxy_server.py"
+    echo "   Start it with: make proxy-up"
     echo ""
 fi
 
@@ -48,7 +48,7 @@ echo ""
 # Test 3: Full API Tests (requires proxy + LLM)
 echo ">>> Test 3: Full API Tests (with LLM streaming)"
 echo "============================================================"
-echo "⚠️  This test requires the proxy server running on port 9001"
+echo "⚠️  This test requires the proxy server running on port 7000"
 echo "   and will make actual LLM API calls."
 read -p "Continue? (y/n) " -n 1 -r
 echo ""
@@ -62,7 +62,7 @@ echo ""
 # Test 4: Agent Conversation Test (requires proxy + LLM)
 echo ">>> Test 4: Agent Conversation Test"
 echo "============================================================"
-echo "⚠️  This test requires the proxy server running on port 9001"
+echo "⚠️  This test requires the proxy server running on port 7000"
 echo "   and will make actual LLM API calls."
 read -p "Continue? (y/n) " -n 1 -r
 echo ""

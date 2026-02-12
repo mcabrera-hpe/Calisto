@@ -55,6 +55,9 @@ data/documents/*
 # Logs
 *.log
 
+# Proxy
+.proxy.pid
+
 # Environment
 .env
 .env.local
