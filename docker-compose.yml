@@ -1,7 +1,7 @@
 services:
   weaviate:
     image: semitechnologies/weaviate:latest
-    container_name: callisto-weaviate
+    container_name: the-grid-weaviate
     ports:
       - "8080:8080"
     environment:
@@ -12,13 +12,13 @@ services:
     volumes:
       - weaviate_data:/var/lib/weaviate
     networks:
-      - callisto-network
+      - the-grid-network
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: callisto-api
+    container_name: the-grid-api
     ports:
       - "8000:8000"
     environment:
@@ -27,14 +27,13 @@ services:
       - WEAVIATE_URL=http://weaviate:8080
       - LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions
       - LLM_API_TOKEN=${LLM_API_TOKEN}
-      - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
-      - MAX_TURNS=30
+      - DEFAULT_MODEL=${DEFAULT_MODEL}
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts
       - ./data:/app/data
     networks:
-      - callisto-network
+      - the-grid-network
     depends_on:
       - weaviate
     command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
@@ -43,7 +42,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: callisto-app
+    container_name: the-grid-app
     ports:
       - "8501:8501"
     environment:
@@ -52,8 +51,7 @@ services:
       - WEAVIATE_URL=http://weaviate:8080
       - LLM_API_ENDPOINT=http://host.docker.internal:7000/v1/chat/completions
       - LLM_API_TOKEN=${LLM_API_TOKEN}
-      - DEFAULT_MODEL=meta/llama-3.1-8b-instruct
-      - MAX_TURNS=30
+      - DEFAULT_MODEL=${DEFAULT_MODEL}
       - API_URL=http://api:8000
     volumes:
       - ./src:/app/src
@@ -62,7 +60,7 @@ services:
       - ./documentation:/app/documentation
       - ./.streamlit:/app/.streamlit
     networks:
-      - callisto-network
+      - the-grid-network
     depends_on:
       - weaviate
       - api
@@ -78,5 +76,5 @@ volumes:
   weaviate_data:
 
 networks:
-  callisto-network:
+  the-grid-network:
     driver: bridge

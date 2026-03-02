@@ -1,4 +1,4 @@
-# Callisto - Business Goals
+# The Grid - Business Goals
 
 **Purpose:** Standardized platform for rapid agent PoC development
 

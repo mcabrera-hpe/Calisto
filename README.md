@@ -1,4 +1,4 @@
-# Callisto - Multi-Agent Conversation Simulator
+# The Grid - Multi-Agent Conversation Simulator
 
 Dockerized multi-agent conversation simulator for B2B PoC development. Agents use external LLM API to simulate business negotiations.
 
@@ -142,7 +142,7 @@ make restart
 
 **Want to see what's happening behind the scenes?**
 
-**Docker Desktop** (recommended): Open Docker Desktop → Containers → **callisto-api** → **Logs** tab, then start a conversation in the UI.
+**Docker Desktop** (recommended): Open Docker Desktop → Containers → **the-grid-api** → **Logs** tab, then start a conversation in the UI.
 
 **CLI alternative:** `docker-compose logs -f api`
 
@@ -165,7 +165,7 @@ The Streamlit UI also shows detailed progress: "Turn 1/5 | Sarah responded in 87
 - Conversation persistence (Weaviate + JSON)
 - Sentiment analysis integration
 
-See [Implementation Plan](documentation/Implementation%20Plan%20-%20Callisto.md) for detailed roadmap
+See [Implementation Plan](documentation/Implementation%20Plan%20-%20The%20Grid.md) for detailed roadmap
 docker-compose logs -f api       # API logs
 docker-compose logs -f app       # Frontend logs
 ```
@@ -183,5 +183,5 @@ Docker Desktop → Settings → Resources → Memory (set to 8GB+)
 
 ## Documentation
 
-- [Implementation Plan](documentation/Implementation%20Plan%20-%20Callisto.md) — Roadmap and task backlog
-- [Business Requirements](documentation/Business%20Requirements%20Document%20-%20Callisto.md) — Project charter and goals
+- [Implementation Plan](documentation/Implementation%20Plan%20-%20The%20Grid.md) — Roadmap and task backlog
+- [Business Requirements](documentation/Business%20Requirements%20Document%20-%20The%20Grid.md) — Project charter and goals

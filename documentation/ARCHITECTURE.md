@@ -1,4 +1,4 @@
-# Callisto Architecture Quick Reference
+# The Grid - Architecture Quick Reference
 
 **Last Updated:** February 13, 2026  
 **Purpose:** Fast context-loading for AI agents and developers
@@ -292,7 +292,7 @@ for line in stream.iter_lines():
 
 Always check these files for context:
 - **[.github/copilot-instructions.md](../.github/copilot-instructions.md)** - Development guidelines, conventions
-- **[Implementation Plan - Callisto.md](Implementation%20Plan%20-%20Callisto.md)** - Roadmap, feature status
+- **[Implementation Plan - The Grid.md](Implementation%20Plan%20-%20The%20Grid.md)** - Roadmap, feature status
 - **[ProjectScore.md](ProjectScore.md)** - Quality metrics, improvement history
 - **[docker-compose.yml](../docker-compose.yml)** - Service definitions
 - **[pyproject.toml](../pyproject.toml)** - Dependencies
@@ -310,6 +310,6 @@ Always check these files for context:
 
 **Quick Start for AI Agents:**  
 1. Read this file first (2 minutes)
-2. Check [Implementation Plan](Implementation%20Plan%20-%20Callisto.md) for current status
+2. Check [Implementation Plan](Implementation%20Plan%20-%20The%20Grid.md) for current status
 3. Review [.github/copilot-instructions.md](../.github/copilot-instructions.md) for coding conventions
 4. Start coding! 🚀

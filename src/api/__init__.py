@@ -1,1 +1,1 @@
-"""FastAPI backend for Callisto multi-agent simulator."""
+"""FastAPI backend for The Grid multi-agent simulator."""

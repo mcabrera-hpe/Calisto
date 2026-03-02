@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Initialize Weaviate collections for Callisto.
+Initialize Weaviate collections for The Grid.
 
 This script creates the necessary collections (classes) in Weaviate:
 1. Document - For storing RAG document chunks with multi-tenancy (per company)
@@ -259,7 +259,7 @@ def verify_setup(client: weaviate.WeaviateClient) -> None:
 def main() -> None:
     """Main function to initialize Weaviate."""
     logger.info("=" * 60)
-    logger.info("Initializing Weaviate for Callisto")
+    logger.info("Initializing Weaviate for The Grid")
     logger.info("=" * 60)
     
     client = None

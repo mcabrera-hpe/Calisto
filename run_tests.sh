@@ -1,11 +1,11 @@
 #!/bin/bash
-# Run all Callisto tests
+# Run all The Grid tests
 # Usage: ./run_tests.sh
 
 set -e  # Exit on error
 
 echo "============================================================"
-echo "Callisto Test Suite"
+echo "The Grid Test Suite"
 echo "============================================================"
 echo ""
 

@@ -1,1 +1,1 @@
-"""Streamlit frontend for Callisto multi-agent simulator."""
+"""Streamlit frontend for The Grid multi-agent simulator."""

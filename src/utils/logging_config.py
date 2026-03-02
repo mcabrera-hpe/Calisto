@@ -1,5 +1,5 @@
 """
-Shared logging configuration for Callisto.
+Shared logging configuration for The Grid.
 
 Provides a consistent logging setup across all scripts and modules.
 """

@@ -22,29 +22,35 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
-# External API configuration
-API_URL = "https://llama-3-1-8b-instruct-1.umang-kedia-hpe-87bcba1f.serving.ai-application.shared08.vcfmr.local"
-TOKEN = os.getenv("LLM_API_TOKEN", "")
-
-if not TOKEN:
-    # Try to read from .env file
+def _read_env_file(key: str) -> str:
+    """Read a value from .env file as fallback."""
     try:
         with open(".env") as f:
             for line in f:
-                if line.startswith("LLM_API_TOKEN="):
-                    TOKEN = line.split("=", 1)[1].strip()
-                    break
+                line = line.strip()
+                if line.startswith(f"{key}="):
+                    return line.split("=", 1)[1].strip()
     except FileNotFoundError:
         pass
+    return ""
 
+# External API configuration - all values from environment
+API_URL = os.getenv("LLM_API_BASE_URL") or _read_env_file("LLM_API_BASE_URL")
+TOKEN = os.getenv("LLM_API_TOKEN") or _read_env_file("LLM_API_TOKEN")
+
+if not API_URL:
+    print("WARNING: LLM_API_BASE_URL not set. Proxy cannot forward requests.")
 if not TOKEN:
     print("WARNING: LLM_API_TOKEN not set. Requests will likely fail.")
 
 @app.route('/v1/chat/completions', methods=['POST'])
 def proxy_chat_completions():
     """Forward chat completion requests to external API."""
+    print(f"[PROXY] Received POST to /v1/chat/completions from {request.remote_addr}")
+    print(f"[PROXY] Content-Type: {request.content_type}")
+    print(f"[PROXY] Headers: {dict(request.headers)}")
     try:
-        print(f"Proxying request to {API_URL}/v1/chat/completions")
+        print(f"[PROXY] Forwarding to {API_URL}/v1/chat/completions")
         
         resp = requests.post(
             f"{API_URL}/v1/chat/completions",

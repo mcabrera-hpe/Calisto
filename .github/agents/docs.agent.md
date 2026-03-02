@@ -46,8 +46,8 @@ Verify that documentation files accurately reflect the current state of the code
 - Configuration variables added/changed
 - Docker services added/removed
 
-### 2. **Implementation Plan - Callisto.md** - Project roadmap
-**Location**: `documentation/Implementation Plan - Callisto.md`
+### 2. **Implementation Plan - The Grid.md** - Project roadmap
+**Location**: `documentation/Implementation Plan - The Grid.md`
 
 **Sections to validate:**
 - **Current Status** - Move completed items from "Not Started" to "Completed"

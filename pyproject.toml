@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "callisto"
+name = "the-grid"
 version = "0.1.0"
-description = "Multi-Agent Conversation Simulator for PoC Development"
+description = "Multi-Agent Conversation Simulator - Enter The Grid"
 authors = ["AI/ML Engineer"]
 readme = "README.md"
 packages = [{include = "src"}]

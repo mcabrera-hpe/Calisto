@@ -1,5 +1,5 @@
 """
-Helper functions for Callisto API.
+Helper functions for The Grid API.
 """
 
 from agents import Agent

@@ -1,4 +1,4 @@
-# Callisto - Implementation Plan
+# The Grid - Implementation Plan
 
 **Version:** Alpha  
 **Timeline:** 2-3 weeks  

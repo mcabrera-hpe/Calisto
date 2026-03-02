@@ -1,5 +1,5 @@
 """
-Quick integration test for Callisto API endpoints.
+Quick integration test for The Grid API endpoints.
 
 Tests API structure without waiting for full LLM responses.
 """
@@ -17,7 +17,7 @@ def test_health():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["service"] == "Callisto API"
+    assert data["service"] == "The Grid API"
     print("PASSED")
 
 
@@ -73,7 +73,7 @@ def test_404():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Callisto API Quick Integration Test")
+    print("The Grid API Quick Integration Test")
     print("=" * 60)
     
     try:

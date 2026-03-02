@@ -1,7 +1,7 @@
 .PHONY: up down restart logs logs-app logs-api logs-weaviate build clean proxy-up proxy-down help
 
 help:
-	@echo "Callisto - Docker Commands"
+	@echo "The Grid - Docker Commands"
 	@echo ""
 	@echo "  make up          - Start all services (Docker + Proxy)"
 	@echo "  make down        - Stop all services (Docker + Proxy)"
